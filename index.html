@@ -3201,10 +3201,648 @@
       }
     }
   </style>
+<style id="cv2css">
+/* ==================== 对话 v2:会话栏 / 消息流 / 模型抽屉 ==================== */
+.cv2 { display: flex; height: calc(100vh - var(--toph)); width: 100% }
+.cv-rail { flex: 0 0 238px; display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--line); background: var(--panel) }
+.cv-rail-head { padding: 12px 10px 8px; display: flex; gap: 8px }
+.cv-rail-head .btn { flex: 1; justify-content: center }
+.cv-slist { flex: 1; min-height: 0; overflow-y: auto; padding: 2px 8px 10px; display: flex; flex-direction: column; gap: 2px }
+.cv-sitem { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; cursor: pointer; color: var(--muted); font-size: 12.5px }
+.cv-sitem:hover { background: var(--panel2); color: var(--text) }
+.cv-sitem.active { background: var(--panel3); color: var(--text) }
+.cv-sitem .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.cv-sitem .x { opacity: 0; font-size: 11px; color: var(--faint); padding: 0 2px; background: none; border: none; cursor: pointer }
+.cv-sitem:hover .x { opacity: 1 }
+.cv-sitem .x:hover { color: var(--bad) }
+.cv-sempty { padding: 14px 10px; font-size: 11.5px; color: var(--faint); line-height: 1.8 }
+.cv-rail-foot { padding: 8px 10px 12px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px }
+.cv-main { flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 0 20px 14px }
+.cv-thread { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 2px 6px; display: flex; flex-direction: column; gap: 15px }
+.cv-msg { display: flex; flex-direction: column; gap: 4px; max-width: 88%; }
+.cv-msg.user { align-self: flex-end; align-items: flex-end }
+.cv-msg.bot { align-self: flex-start; align-items: flex-start }
+.cv-msg.sys { align-self: center; align-items: center; max-width: 96% }
+.cv-role { font-size: 10.5px; letter-spacing: .04em; color: var(--faint); padding: 0 6px }
+.cv-bubble { padding: 11px 14px; border-radius: 15px; font-size: 13.5px; line-height: 1.75; white-space: pre-wrap; word-break: break-word; max-width: 100% }
+.cv-msg.user .cv-bubble { background: var(--grad); color: #fff; border-bottom-right-radius: 5px }
+.cv-msg.bot .cv-bubble { background: var(--panel2); border: 1px solid var(--line); border-bottom-left-radius: 5px }
+.cv-msg.sys .cv-bubble { background: none; border: 1px dashed var(--line); color: var(--faint); font-size: 11.5px; padding: 6px 11px; border-radius: 99px }
+.cv-bubble.md { white-space: normal }
+.cv-msg.err .cv-bubble { border-color: var(--bad); color: var(--bad); background: rgba(255, 107, 107, .06) }
+.cv-bubble code { font-family: var(--mono); font-size: 12.5px; background: var(--panel3); padding: 1px 5px; border-radius: 5px }
+.cv-bubble .md-code { position: relative; margin: 8px 0 }
+.cv-bubble .md-code pre { margin: 0; padding: 10px 12px; background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto }
+.cv-bubble .md-code code { background: none; padding: 0; font-size: 12px; white-space: pre }
+.cv-bubble .md-copy { position: absolute; top: 6px; right: 6px; padding: 2px 8px; font-size: 11px; color: var(--muted); background: var(--panel3); border: 1px solid var(--line); border-radius: 6px; cursor: pointer }
+.cv-acts { display: flex; gap: 4px; padding: 0 2px; opacity: 0; transition: opacity .12s }
+.cv-msg:hover .cv-acts { opacity: 1 }
+.cv-acts button { background: none; border: none; color: var(--faint); font-size: 11px; cursor: pointer; padding: 2px 5px; border-radius: 5px }
+.cv-acts button:hover { color: var(--accent); background: var(--panel2) }
+.cv-meta { font-size: 10.5px; color: var(--faint); font-family: var(--mono); padding: 0 6px }
+.cv-cur::after { content: '▋'; color: var(--accent); animation: cvblink 1s steps(2) infinite }
+@keyframes cvblink { 50% { opacity: 0 } }
+.cv-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; padding: 20px }
+.cv-empty .big { font-size: 22px; font-weight: 500 }
+.cv-empty p { color: var(--muted); font-size: 12.5px; margin: 0; max-width: 470px; line-height: 1.85 }
+.cv-sugs { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 8px; max-width: 560px }
+.cv-sug { border: 1px solid var(--line); background: var(--panel2); color: var(--muted); padding: 7px 12px; border-radius: 99px; font-size: 12px; cursor: pointer }
+.cv-sug:hover { border-color: var(--accent); color: var(--text) }
+.cv-box { display: flex; align-items: flex-end; gap: 8px; background: var(--panel); border: 1px solid var(--line-strong); border-radius: 18px; padding: 7px 7px 7px 14px; transition: border-color .15s }
+.cv-box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(110, 125, 255, .12) }
+.cv-box textarea { flex: 1; border: none; background: none; resize: none; font-family: var(--sans); font-size: 14px; line-height: 1.62; max-height: 176px; padding: 8px 0; outline: none; color: var(--text); min-height: 38px }
+.cv-box .send { width: 38px; height: 38px; flex: 0 0 38px; border-radius: 50%; padding: 0; font-size: 15px }
+.cv-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 8px 4px 0; font-size: 11px; color: var(--faint) }
+.cv-tools .btn { padding: 4px 10px; font-size: 11px; border-radius: 99px }
+.cv-srcpill { font-size: 10.5px; font-family: var(--mono); padding: 2px 8px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted) }
+.cv-dlg { position: fixed; inset: 0; background: rgba(2, 4, 10, .6); display: none; align-items: center; justify-content: center; z-index: 220; padding: 18px }
+.cv-dlg.on { display: flex }
+.cv-card { background: var(--panel); border: 1px solid var(--line-strong); border-radius: 18px; width: min(700px, 100%); max-height: 86vh; display: flex; flex-direction: column; box-shadow: var(--shadow); overflow: hidden }
+.cv-card-h { padding: 13px 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px }
+.cv-card-h h3 { margin: 0; font-size: 14.5px; flex: 1 }
+.cv-card-b { padding: 14px 16px; overflow: auto; display: flex; flex-direction: column; gap: 12px }
+.cv-card-f { padding: 11px 16px; border-top: 1px solid var(--line); display: flex; gap: 8px; align-items: center; flex-wrap: wrap }
+.cv-hint { font-size: 11.5px; color: var(--faint); line-height: 1.75 }
+.cv-filerow { display: flex; align-items: center; gap: 10px; font-size: 12px; padding: 5px 0; border-bottom: 1px dashed var(--line) }
+.cv-filerow .n { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); font-size: 11.5px }
+.cv-filerow .s { color: var(--faint); font-family: var(--mono); font-size: 11px; white-space: nowrap }
+.cv-filerow .ok { color: var(--accent2) }
+.cv-prog { height: 6px; background: var(--panel3); border-radius: 99px; overflow: hidden }
+.cv-prog i { display: block; height: 100%; width: 0; background: var(--grad); transition: width .2s }
+.cv-mrow { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 12px; font-size: 12.5px }
+.cv-mrow .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.cv-mrow .sz { color: var(--faint); font-family: var(--mono); font-size: 11px }
+@media (max-width: 1080px) { .cv-rail { display: none } }
+</style>
 </head>
 
 <body>
   <!-- 融合标志:必须在引擎脚本之前设置,推理引擎据此跳过自带 UI -->
+  <style id="mcCss">
+    /* ==========================================================================
+       模型中心 (Model Center) · 训练快照 / 开源权重 / 下载 / 存储分享 一体化
+       仅使用主题变量，浅色与深色主题共用
+       ========================================================================== */
+    .mc-head {
+      display: flex;
+      gap: 18px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      margin-bottom: 14px
+    }
+
+    .mc-head-l {
+      min-width: 0
+    }
+
+    .mc-eyebrow {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .18em;
+      color: var(--accent);
+      opacity: .9
+    }
+
+    .mc-head h2 {
+      font-size: 24px;
+      margin: 2px 0 4px
+    }
+
+    .mc-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12.5px;
+      max-width: 760px
+    }
+
+    .mc-kpis {
+      display: flex;
+      gap: 8px;
+      margin-left: auto;
+      flex-wrap: wrap
+    }
+
+    .mc-kpi {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 8px 14px;
+      min-width: 92px
+    }
+
+    .mc-kpi b {
+      display: block;
+      font-size: 18px;
+      line-height: 1.3;
+      font-variant-numeric: tabular-nums
+    }
+
+    .mc-kpi span {
+      font-size: 10.5px;
+      color: var(--faint)
+    }
+
+    /* ---------- 当前模型 ---------- */
+    .mc-now {
+      background:
+        radial-gradient(700px 220px at 0% 0%, rgba(110, 125, 255, .10), transparent 70%),
+        var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px 18px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(250px, 320px);
+      gap: 14px 20px;
+      margin-bottom: 14px
+    }
+
+    .mc-now-main {
+      display: flex;
+      gap: 13px;
+      align-items: center;
+      min-width: 0
+    }
+
+    .mc-ava {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: var(--grad);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 750;
+      font-size: 13px;
+      flex: 0 0 auto;
+      letter-spacing: -.02em;
+      box-shadow: 0 6px 16px rgba(110, 125, 255, .25)
+    }
+
+    .mc-ava.lg {
+      width: 52px;
+      height: 52px;
+      font-size: 15px
+    }
+
+    .mc-ava.off {
+      background: linear-gradient(135deg, #12a05f, #3ddc97);
+      box-shadow: 0 6px 16px rgba(61, 220, 151, .22)
+    }
+
+    .mc-now-txt {
+      min-width: 0;
+      flex: 1
+    }
+
+    .mc-now-title {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap
+    }
+
+    .mc-now-title>b {
+      font-size: 18px;
+      letter-spacing: -.01em
+    }
+
+    .mc-now-meta {
+      font-family: var(--mono);
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.85;
+      margin-top: 3px;
+      overflow-wrap: anywhere
+    }
+
+    .mc-hint {
+      font-size: 11.5px;
+      color: var(--faint);
+      margin-top: 3px
+    }
+
+    .mc-now-stats {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+      flex-wrap: wrap
+    }
+
+    .mc-mini {
+      background: var(--bg2);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 6px 11px;
+      min-width: 82px
+    }
+
+    .mc-mini>span {
+      display: block;
+      font-size: 10px;
+      color: var(--faint);
+      margin-bottom: 1px
+    }
+
+    .mc-mini>b {
+      font-size: 13px;
+      font-variant-numeric: tabular-nums
+    }
+
+    .mc-mini-wide {
+      flex: 1 1 170px;
+      min-width: 170px
+    }
+
+    .mc-select {
+      width: 100%;
+      height: 27px;
+      margin-top: 2px;
+      padding: 0 6px;
+      font-size: 11.5px;
+      border-radius: 7px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      color: var(--text);
+      max-width: 100%
+    }
+
+    .mc-now-acts {
+      grid-column: 1/-1;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      border-top: 1px dashed var(--line);
+      padding-top: 12px
+    }
+
+    .mc-src {
+      font-family: var(--mono);
+      font-size: 9.5px;
+      color: var(--faint);
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      padding: 1px 7px
+    }
+
+    .stage-tag.s-off {
+      background: rgba(61, 220, 151, .10);
+      color: var(--accent2);
+      border-color: rgba(61, 220, 151, .30)
+    }
+
+    .mc-src.off {
+      color: var(--accent2);
+      border-color: rgba(61, 220, 151, .35)
+    }
+
+    /* ---------- 工具条 ---------- */
+    .mc-toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 7px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 13px;
+      margin-bottom: 14px
+    }
+
+    .mc-tabs {
+      display: flex;
+      gap: 2px;
+      background: var(--bg2);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 3px;
+      flex-wrap: wrap
+    }
+
+    .mc-tabs button {
+      background: transparent;
+      border: 0;
+      color: var(--muted);
+      padding: 6px 11px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-family: var(--sans);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: .12s
+    }
+
+    .mc-tabs button:hover {
+      color: var(--text)
+    }
+
+    .mc-tabs button.active {
+      background: var(--panel3);
+      color: var(--text);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .mc-tools {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-left: auto
+    }
+
+    .mc-tools input[type=search] {
+      width: 210px;
+      height: 32px;
+      font-size: 12px;
+      padding: 0 10px;
+      border-radius: 8px;
+      background: var(--bg2);
+      border: 1px solid var(--line);
+      color: var(--text)
+    }
+
+    .mc-tools select {
+      height: 32px;
+      font-size: 12px;
+      padding: 0 8px;
+      border-radius: 8px;
+      background: var(--bg2);
+      border: 1px solid var(--line);
+      color: var(--text)
+    }
+
+    .mc-tools .btn {
+      padding: 6px 11px;
+      font-size: 12px
+    }
+
+    /* ---------- 列表 / 卡片 ---------- */
+    .mc-grid {
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr))
+    }
+
+    .mc-card {
+      gap: 10px;
+      position: relative
+    }
+
+    .mc-card.cur {
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 1px var(--accent2) inset
+    }
+
+    .mc-ctop {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      min-width: 0
+    }
+
+    .mc-ctitle {
+      min-width: 0;
+      flex: 1
+    }
+
+    .mc-nm {
+      font-weight: 650;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis
+    }
+
+    .mc-badges {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 4px
+    }
+
+    .mc-inuse {
+      font-size: 9.5px;
+      font-family: var(--mono);
+      color: var(--accent2)
+    }
+
+    .mc-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-size: 11px;
+      color: var(--faint);
+      font-family: var(--mono)
+    }
+
+    .mc-meta>div {
+      display: flex;
+      gap: 8px;
+      min-width: 0
+    }
+
+    .mc-meta span {
+      flex: 0 0 32px;
+      color: var(--faint);
+      opacity: .75
+    }
+
+    .mc-meta b {
+      font-weight: 500;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0
+    }
+
+    .mc-card.mini {
+      min-width: 0
+    }
+
+    .mc-card.mini .mt {
+      font-family: var(--mono);
+      font-size: 11px
+    }
+
+    .mc-empty {
+      text-align: center;
+      padding: 44px 14px;
+      color: var(--faint);
+      border: 1px dashed var(--line-strong);
+      border-radius: 14px;
+      font-size: 13px;
+      line-height: 1.9
+    }
+
+    .mc-empty b {
+      color: var(--text);
+      display: block;
+      margin-bottom: 2px;
+      font-size: 14px
+    }
+
+    /* 卡片「更多」菜单 */
+    .mc-more {
+      position: relative
+    }
+
+    .mc-more>summary {
+      list-style: none;
+      cursor: pointer;
+      user-select: none
+    }
+
+    .mc-more>summary::-webkit-details-marker {
+      display: none
+    }
+
+    .mc-more[open]>summary {
+      border-color: var(--line-strong);
+      background: var(--panel3)
+    }
+
+    .mc-menu {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 6px);
+      min-width: 164px;
+      background: var(--panel);
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      padding: 6px;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      gap: 3px
+    }
+
+    .mc-menu button {
+      background: transparent;
+      border: 0;
+      color: var(--text);
+      text-align: left;
+      padding: 7px 9px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-family: var(--sans);
+      cursor: pointer
+    }
+
+    .mc-menu button:hover {
+      background: var(--panel2)
+    }
+
+    .mc-menu button.danger {
+      color: var(--bad)
+    }
+
+    /* ---------- 发现与下载 ---------- */
+    .mc-dl-card {
+      margin-bottom: 4px
+    }
+
+    .mc-dl-head {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 12px
+    }
+
+    .mc-dl-head>div {
+      min-width: 0
+    }
+
+    .mc-dl-head .pill {
+      margin-left: auto;
+      flex: 0 0 auto
+    }
+
+    .mc-mkt-head {
+      margin: 22px 0 10px
+    }
+
+    .mc-mkt-head h3 {
+      font-size: 17px;
+      margin-bottom: 3px
+    }
+
+    .mc-mkt-head .desc {
+      margin: 0
+    }
+
+    .mc-loadany {
+      margin-top: 16px
+    }
+
+    /* ---------- 存储与分享 ---------- */
+    .mc-two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px
+    }
+
+    .mc-storage {
+      margin-top: 12px;
+      background: var(--bg2);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.95;
+      font-family: var(--mono);
+      overflow-wrap: anywhere
+    }
+
+    .mc-storage b {
+      color: var(--text);
+      font-weight: 600
+    }
+
+    .mc-pane[hidden] {
+      display: none !important
+    }
+
+    @media(max-width:900px) {
+      .mc-two {
+        grid-template-columns: 1fr
+      }
+
+      .mc-now {
+        grid-template-columns: 1fr
+      }
+
+      .mc-kpis {
+        margin-left: 0
+      }
+    }
+
+    @media(max-width:720px) {
+      .mc-tools {
+        width: 100%;
+        margin-left: 0
+      }
+
+      .mc-tools input[type=search] {
+        flex: 1 1 160px;
+        width: auto
+      }
+
+      .mc-head h2 {
+        font-size: 21px
+      }
+
+      .mc-tabs {
+        width: 100%
+      }
+
+      .mc-tabs button {
+        flex: 1 1 auto
+      }
+    }
+
+  </style>
+
   <script>window.__TLX_EMBED__ = true;</script>
 
   <div class="app" id="app">
@@ -3221,25 +3859,23 @@
       </div>
 
       <nav class="tabs" id="tabs">
-        <div class="navlabel">开始</div>
-        <button class="active" data-tab="home"><span class="ico">🏠</span>首页</button>
-        <button data-tab="chat"><span class="ico">💬</span>对话</button>
+        <div class="navlabel">对话</div>
+        <button class="active" data-tab="chat"><span class="ico">💬</span>对话</button>
+
+        <div class="navlabel">模型</div>
+        <button data-tab="hub"><span class="ico">📦</span>模型中心</button>
         <button data-tab="wizard"><span class="ico">✨</span>造一个模型</button>
 
-        <div class="navlabel">我的模型</div>
-        <button data-tab="hub"><span class="ico">📦</span>模型库</button>
-        <button data-tab="market"><span class="ico">🌐</span>模型市场</button>
-        <button data-tab="weights"><span class="ico">💾</span>保存与分享</button>
-
-        <div class="navlabel">创作与实验</div>
+        <div class="navlabel">工作室</div>
         <button data-tab="studio"><span class="ico">🎨</span>AI 工坊</button>
         <button data-tab="viz"><span class="ico">📈</span>实验台</button>
-
-        <div class="navlabel">专家工具</div>
+        <button data-tab="train"><span class="ico">🔥</span>训练台</button>
         <button data-tab="data"><span class="ico">📄</span>数据</button>
         <button data-tab="arch"><span class="ico">🧬</span>架构</button>
-        <button data-tab="train"><span class="ico">🔥</span>训练台</button>
         <button data-tab="infer"><span class="ico">🧠</span>推理台</button>
+
+        <div class="navlabel">关于</div>
+        <button data-tab="home"><span class="ico">🏠</span>介绍页</button>
       </nav>
 
       <div class="nav-spacer"></div>
@@ -3288,7 +3924,7 @@
       <main id="main">
 
         <!-- ============ 首页(意图入口) ============ -->
-        <section class="panel homeview active" id="panel-home">
+        <section class="panel homeview" id="panel-home">
           <div class="homewrap">
 
             <div class="hero" id="hero">
@@ -3520,14 +4156,14 @@
         </section>
 
         <!-- ============ 对话 ============ -->
-        <section class="panel chatview" id="panel-chat">
+        <section class="panel chatview active" id="panel-chat">
           <div class="chatview-grid">
             <div class="chatview-main">
               <div class="chatscroll chatstream" id="chatLog"></div>
 
               <div class="composer-wrap">
                 <div class="composer">
-                  <input id="chatInput" placeholder="输入消息,回车发送…" type="text">
+                  <textarea id="chatInput" placeholder="输入消息…  Enter 发送 / Shift+Enter 换行" rows="1"></textarea>
                   <button class="btn primary send" id="chatSend" title="发送">➤</button>
                 </div>
                 <div class="composer-tools">
@@ -3597,115 +4233,176 @@
               <p class="desc" style="margin-bottom:8px">一键填入常见提示格式;若语料是问答 / 对话格式,配上对应模板效果更好。</p>
               <div class="btnrow" id="promptLib"></div>
               <div class="divider"></div>
-              <div class="tiny">字符级小模型只能学到语料里的模式,回答会比较天真 🙂。想更聪明:回「造一个模型」换 BPE 分词、加练,或到「模型市场」加载公开权重。</div>
+              <div class="tiny">字符级小模型只能学到语料里的模式,回答会比较天真 🙂。想更聪明:回「造一个模型」换 BPE 分词、加练,或到「模型中心 · 发现与下载」加载公开权重。</div>
             </aside>
           </div>
         </section>
 
-        <!-- ============ 模型市场(公开权重) ============ -->
-        <section class="panel" id="panel-market">
-          <div class="mkt-hero">
-            <div style="flex:1 1 380px;min-width:0">
-              <h2>🌐 模型市场 · 公开权重</h2>
-              <p>把业界公开的 safetensors 权重(Qwen / Llama / DeepSeek / Gemma / BitNet / RWKV …)加载进推理引擎,随后在
-                <b>「对话」页</b>选用。权重可以从 <b>HuggingFace / ModelScope 地址</b>在线拉取,也可以放到本地
-                <span class="mono">models/</span> 目录离线加载。与本机训练模型共用同一套会话层:采样器 / 对话模板 / 流式输出 / 上下文重排。
-              </p>
+        <!-- ============ 模型中心(训练快照 / 开源权重 / 下载 / 存储分享 一体化) ============ -->
+        <section class="panel hubview" id="panel-hub">
+          <div class="mc-head">
+            <div class="mc-head-l">
+              <div class="mc-eyebrow">MODEL CENTER</div>
+              <h2>模型中心</h2>
+              <p>训练快照、已下载的开源权重、对话正在使用的模型——全部在这里管理。选用后即可继续训练 / 对话 / 去工坊。</p>
             </div>
-            <div style="flex:0 1 300px;min-width:250px">
-              <div class="note" style="margin:0">
-                <b>小提示:</b>官方权重通道需要 <b>WebGPU</b>(https / localhost 环境)。没有 GPU 也别担心——
-                <b>本机训练模型</b>走 CPU 算子,全程可用。
+            <div class="mc-kpis">
+              <div class="mc-kpi"><b id="mcKpiLocal">0</b><span>训练快照</span></div>
+              <div class="mc-kpi"><b id="mcKpiOffline">0</b><span>开源权重</span></div>
+              <div class="mc-kpi"><b id="mcKpiSize">—</b><span>本地占用</span></div>
+            </div>
+          </div>
+
+          <!-- 当前模型 -->
+          <div class="mc-now">
+            <div class="mc-now-main">
+              <div class="mc-ava lg" id="mcNowAva">TL</div>
+              <div class="mc-now-txt">
+                <div class="mc-now-title">
+                  <b id="hubActiveName">尚未构建模型</b>
+                  <span class="stage-tag s-pt" id="mcStageTag">预训练</span>
+                  <span class="mc-src" id="mcNowSrc">训练模型</span>
+                </div>
+                <div class="mc-now-meta" id="hubActiveMeta">去「数据」页填入语料并构建词表，再到「架构」页初始化模型；或在下方选用一个已保存模型。</div>
+                <div class="mc-hint" id="hubHint">模型与权重全部保存在浏览器本地，不上传任何数据。</div>
+              </div>
+            </div>
+            <div class="mc-now-stats">
+              <div class="mc-mini"><span>训练阶段</span><b id="hubStage">—</b></div>
+              <div class="mc-mini"><span>步数</span><b id="hubStep">0</b></div>
+              <div class="mc-mini mc-mini-wide"><span>对话使用</span>
+                <select class="mc-select" id="mcChatSelect" title="对话页当前使用的模型"></select>
+              </div>
+            </div>
+            <div class="mc-now-acts">
+              <button class="btn primary" id="hubGoTrain">▶ 继续训练</button>
+              <button class="btn" id="hubGoChat">💬 去对话</button>
+              <button class="btn" id="hubGoStudio">🎨 去工坊</button>
+              <button class="btn" id="hubSaveAs">💾 保存快照</button>
+            </div>
+          </div>
+
+          <!-- 工具条 -->
+          <div class="mc-toolbar">
+            <div class="mc-tabs" id="mcTabs" role="tablist">
+              <button class="active" data-mc="all">全部</button>
+              <button data-mc="local">训练快照</button>
+              <button data-mc="offline">开源权重</button>
+              <button data-mc="discover">发现与下载</button>
+              <button data-mc="storage">存储与分享</button>
+            </div>
+            <div class="mc-tools" id="mcTools">
+              <input class="mc-only-list" id="mcSearch" type="search" placeholder="搜索名称 / 架构 / 来源…">
+              <select class="mc-only-list" id="mcSort" title="排序">
+                <option value="recent">最近更新</option>
+                <option value="name">名称 A→Z</option>
+                <option value="size">占用从大到小</option>
+              </select>
+              <button class="btn" id="mcDownloadBtn">⬇ 下载权重</button>
+              <button class="btn ghost" id="hubImportBtn">📂 导入 JSON</button>
+              <button class="btn ghost" id="hubRefreshBtn">🔄 刷新</button>
+              <span class="tiny" id="hubCount"></span>
+              <input accept=".json" id="hubImportFile" type="file" style="display:none">
+            </div>
+          </div>
+
+          <!-- 列表 -->
+          <div class="mc-pane" id="mcPaneList">
+            <div class="mgrid mc-grid" id="hubGrid"></div>
+            <div class="mc-empty" id="mcEmpty" style="display:none"></div>
+          </div>
+
+          <!-- 发现与下载 -->
+          <div class="mc-pane" id="mcPaneDiscover" style="display:none">
+            <div class="card mc-dl-card">
+              <div class="mc-dl-head">
+                <div>
+                  <h3>从 HuggingFace / ModelScope 下载</h3>
+                  <p class="desc">输入仓库 ID 或链接，权重会逐文件写入浏览器 OPFS，断网可用；同一个模型只下载一次。下载完成后自动出现在「开源权重」。</p>
+                </div>
+                <span class="pill" id="mcOfflineCount">0 个已下载</span>
+              </div>
+              <div class="inline">
+                <input id="mcRepoInput" type="text" placeholder="Qwen/Qwen2.5-0.5B-Instruct 或 huggingface / 魔搭链接">
+                <button class="btn primary" id="mcRepoGo" style="flex:0 0 auto">下载并加入模型中心</button>
+              </div>
+              <div class="tiny" id="mcRepoHint" style="margin-top:8px">会依次尝试 HuggingFace → hf-mirror → 魔搭；已下载的文件会自动跳过。</div>
+            </div>
+
+            <div class="mc-mkt-head">
+              <div>
+                <h3>模型市场 · 公开权重</h3>
+                <p class="desc">Qwen / Llama / DeepSeek / Gemma / BitNet / RWKV… 点「下载到本地」写入 OPFS，之后离线可用；「加载到显存」只是临时试跑。</p>
+              </div>
+            </div>
+            <div class="mkt-search">
+              <input id="mktSearch" type="text" placeholder="搜索模型名称 / 厂商 / 架构…">
+              <button class="chip" data-filter="all">全部</button>
+              <button class="chip" data-filter="download">可下载权重</button>
+              <button class="chip" data-filter="local">可本地目录</button>
+              <button class="chip" data-filter="custom">自研结构</button>
+              <span class="spacer"></span>
+              <span class="tiny" id="mktCount"></span>
+            </div>
+            <div class="mkt-grid" id="mktGrid"></div>
+
+            <div class="card mc-loadany">
+              <h3>高级：从权重目录 / URL 直接加载到显存</h3>
+              <p class="desc">不写入 OPFS，适合临时试跑。选择架构后填入相对站点根的目录或 http(s) 地址（需目标站点允许跨域），加载进度在「推理台」显示。</p>
+              <div class="row2">
+                <div class="field">
+                  <label>架构</label>
+                  <select id="mktArch"></select>
+                </div>
+                <div class="field">
+                  <label>权重目录或 URL</label>
+                  <input id="mktDir" type="text" placeholder="models/qwen35-0.8b 或 https://…/resolve/main">
+                </div>
+              </div>
+              <div class="btnrow" style="margin-top:10px">
+                <button class="btn primary" id="mktLoad">▶ 加载权重</button>
+                <button class="btn" id="mktToInfer">前往推理台</button>
+                <span class="tiny" id="mktStatus">尚未加载。</span>
               </div>
             </div>
           </div>
 
-          <div class="card">
-            <h3>加载任意权重目录 / URL</h3>
-            <p class="desc">选择架构,填入权重目录(相对站点根)或 http(s)
-              地址(需目标站点允许跨域),点「加载权重」。加载进度在「推理台」显示,加载完成后到「对话」页的模型选择器里选「官方权重」即可对话。</p>
-            <div class="row2">
-              <div class="field">
-                <label>架构</label>
-                <select id="mktArch"></select>
-              </div>
-              <div class="field">
-                <label>权重目录或 URL</label>
-                <input id="mktDir" type="text" placeholder="models/qwen35-0.8b 或 https://…/resolve/main">
-              </div>
-            </div>
-            <div class="btnrow" style="margin-top:10px">
-              <button class="btn primary" id="mktLoad">▶ 加载权重</button>
-              <button class="btn" id="mktToInfer">前往对话</button>
-              <span class="tiny" id="mktStatus">尚未加载。</span>
-            </div>
-          </div>
-
-          <div class="mkt-search">
-            <input id="mktSearch" type="text" placeholder="搜索模型名称 / 厂商 / 架构…">
-            <button class="chip" data-filter="all">全部</button>
-            <button class="chip" data-filter="download">可下载权重</button>
-            <button class="chip" data-filter="local">可本地目录</button>
-            <button class="chip" data-filter="custom">自研结构</button>
-            <span class="spacer"></span>
-            <span class="tiny" id="mktCount"></span>
-          </div>
-          <div class="mkt-grid" id="mktGrid"></div>
-
-          <div class="note" style="margin-top:16px">
-            <b>本机训练的模型</b>在「模型库」与顶部模型切换器里;「保存与分享」可保存 / 导出 / 生成单文件分享包。
-            公开权重仅在浏览器内运行,不上传任何数据;首次在线加载会把权重拉到内存,刷新后需重新加载。
-          </div>
-        </section>
-
-        <section class="panel" id="panel-hub">
-          <div class="card">
-            <h3>当前模型</h3>
-            <p class="desc">一切功能围绕「当前模型」展开:训练它、和它对话、用它文生图 / 驱动 Agent / 编排工作流。在下方「模型库」里选用任一已保存模型,或去数据页 + 架构页从零训练一个新模型。
-            </p>
-            <div class="hub-active">
-              <div class="big">
-                <div class="nm" id="hubActiveName">—</div>
-                <div class="mt mono" id="hubActiveMeta" style="font-size:12px;color:var(--muted);line-height:1.9">尚未构建模型
+          <!-- 存储与分享 -->
+          <div class="mc-pane" id="mcPaneStorage" style="display:none">
+            <div class="mc-two">
+              <div class="card">
+                <h3>保存当前训练模型</h3>
+                <p class="desc">把当前权重、配置、词表一并存入浏览器 IndexedDB（仅本地）。也可以导出 JSON，或生成单文件 HTML 分享包。</p>
+                <div class="inline">
+                  <input id="saveName" placeholder="快照名称，如：第 500 步" type="text">
                 </div>
                 <div class="btnrow" style="margin-top:10px">
-                  <button class="btn primary" id="hubGoTrain">▶ 继续训练</button>
-                  <button class="btn" id="hubGoChat">💬 去对话</button>
-                  <button class="btn" id="hubGoStudio">🎨 去工坊</button>
-                  <button class="btn" id="hubSaveAs">💾 保存快照</button>
+                  <button class="btn primary" id="saveBtn">💾 保存到浏览器</button>
+                  <button class="btn" id="exportCurrentBtn">导出为 JSON</button>
+                  <button class="btn" id="shareCurrentBtn">📦 生成分享包</button>
+                </div>
+                <div class="tiny" style="margin-top:10px">分享包是独立 HTML：对方双击即可对话，无需联网 / 安装。</div>
+              </div>
+              <div class="card">
+                <h3>导入与存储</h3>
+                <p class="desc">从别处导入 JSON 权重；查看浏览器为 TLX Studio 分配的空间，按需申请持久存储。</p>
+                <div class="inline">
+                  <input accept=".json" id="importFile" type="file" style="font-family:var(--sans)">
+                  <span class="tiny">选择 .json 权重文件</span>
+                </div>
+                <div class="mc-storage" id="storageInfo">正在统计…</div>
+                <div class="btnrow" style="margin-top:10px">
+                  <button class="btn ghost" id="mcPersistBtn">申请持久存储</button>
+                  <button class="btn ghost" id="mcWarmToggle">启动时自动加载上次模型</button>
                 </div>
               </div>
-              <div class="side">
-                <div class="metrics" style="grid-template-columns:1fr 1fr;margin:0">
-                  <div class="metric">
-                    <div class="k">训练阶段</div>
-                    <div class="v acc" id="hubStage" style="font-size:14px">—</div>
-                  </div>
-                  <div class="metric">
-                    <div class="k">步数</div>
-                    <div class="v" id="hubStep">0</div>
-                  </div>
-                </div>
-                <div class="tiny" id="hubHint">提示:模型库保存在浏览器 IndexedDB,仅本地;「分享包」可导出单文件 HTML 送给别人。</div>
-              </div>
             </div>
-          </div>
-          <div class="card">
-            <h3>模型库</h3>
-            <p class="desc">所有保存过的模型(含不同训练阶段:预训练 / 后训练 / 强化学习 / P2P 联邦)。选用后即成为「当前模型」。</p>
-            <div class="btnrow" style="margin-bottom:12px">
-              <button class="btn" id="hubImportBtn">📂 从 JSON 导入</button>
-              <input accept=".json" id="hubImportFile" type="file" style="display:none">
-              <button class="btn" id="hubRefreshBtn">🔄 刷新列表</button>
-              <span class="tiny" id="hubCount"></span>
+            <div class="note">
+              <b>存储位置：</b>训练快照在 IndexedDB；开源权重在 OPFS（<span class="mono">tlx-models/</span>）。开源权重通常是几百 MB 到几 GB，建议先点「申请持久存储」，避免浏览器在磁盘紧张时自动清理。
             </div>
-            <div class="mgrid" id="hubGrid"></div>
-          </div>
-          <div class="note">
-            <b>v3 新能力:</b>训练阶段扩展为<b>预训练 / 后训练(SFT)/ 强化学习(规则奖励 + 人工奖励)</b>,并支持 <b>P2P 联邦训练</b>(同一浏览器多标签零配置协同,或填入信令服务器
-            WebSocket 地址与他人组网);「AI 工坊」把训练成果用于<b>文生图、文生视频、Agent 工具调用、工作流编排</b>。
           </div>
         </section>
+
         <section class="panel" id="panel-data">
           <div class="card">
             <h3>训练语料</h3>
@@ -4469,33 +5166,6 @@ console.log('signaling server on ws://0.0.0.0:8080');</pre>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
-        <section class="panel" id="panel-weights">
-          <div class="card">
-            <h3>保存当前权重</h3>
-            <p class="desc">权重、配置、词表一并存入浏览器 IndexedDB(仅本地,不上传)。可保存多个版本,随时在「对话」页选用。<b>生成分享包</b>则导出单文件
-              HTML:对方双击打开即可对话,无需联网 / 安装。</p>
-            <div class="inline">
-              <input id="saveName" placeholder="权重集名称,如:第500步" type="text">
-              <button class="btn primary" id="saveBtn">💾 保存到浏览器</button>
-              <button class="btn" id="exportCurrentBtn">导出为 JSON</button>
-              <button class="btn" id="shareCurrentBtn">📦 生成分享包</button>
-            </div>
-            <div class="inline" style="margin-top:10px">
-              <input accept=".json" id="importFile" type="file" style="font-family:var(--sans)">
-              <span class="tiny">从 JSON 文件导入权重</span>
-            </div>
-            <div class="tiny" id="storageInfo" style="margin-top:10px"></div>
-          </div>
-          <div class="card">
-            <h3>已保存的权重集</h3>
-            <div class="wlist" id="weightList"></div>
-          </div>
-          <div class="note">
-            <b>设计参考:</b> 本项目从 <a href="https://trekhleb.dev/homemade-gpt-js/"
-              target="_blank">Homemade-GPT-JS</a>、Karpathy 的 minGPT/nanoGPT、以及芬兰 <a href="https://lm.gen-ai.fi"
-              target="_blank">GenAI NanoGPT</a>(lm.gen-ai.fi) 等浏览器训练项目汲取灵感;模型组件对齐 Llama-3 架构。全部计算在本地完成。
           </div>
         </section>
         <section class="panel" id="panel-infer">
@@ -9441,69 +10111,38 @@ console.log('signaling server on ws://0.0.0.0:8080');</pre>
         }
         return { model: model, vocab: vocab, bpe: bpe, tokType: rec.tokType || ( bpe ? 'bpe' : 'char' ), meta: rec };
       }
+      // 模型列表已统一到「模型中心」：这里只负责触发重绘（保留旧调用点）
       async function refreshWeightList ()
       {
-        var recs = await idbAll();
-        recs.sort( function ( a, b ) { return ( b.ts || 0 ) - ( a.ts || 0 ) || b.step - a.step; } );
-        var box = $( 'weightList' );
-        if ( !recs.length ) { box.innerHTML = '<div class="tiny">尚无已保存的权重集。训练后可在上方保存。</div>'; updateStorageInfo( recs ); return; }
-        box.innerHTML = '';
-        recs.forEach( function ( rec )
-        {
-          var item = document.createElement( 'div' ); item.className = 'witem';
-          var archTag = ( rec.cfg.norm + '/' + rec.cfg.pos + '/' + rec.cfg.attn + '/' + rec.cfg.ffn ).toUpperCase();
-          item.innerHTML =
-            '<div class="info"><div class="nm">' + escapeHtml( rec.name ) + ' <span class="tag">' + archTag + '</span></div>' +
-            '<div class="mt">步数 ' + rec.step + ' · 词表 ' + rec.vocab.vocabSize + ' · ' + ( rec.cfg.dim ) + 'd/' + rec.cfg.nLayers + 'L · ' + escapeHtml( rec.createdAt || '' ) + '</div></div>';
-          var acts = document.createElement( 'div' ); acts.className = 'acts';
-          var bLoad = document.createElement( 'button' ); bLoad.className = 'btn'; bLoad.textContent = '载入为当前';
-          bLoad.onclick = async function ()
-          {
-            if ( S.training ) { addSysNote( '训练进行中,请先暂停再载入权重。' ); return; }
-            var loaded = loadModelFromRecord( rec );
-            S.model = loaded.model; S.cfg = loaded.model.cfg; S.vocab = loaded.vocab;
-            S.bpe = loaded.bpe; S.tokType = loaded.tokType;
-            S.stage = rec.stage || 'pretrain';
-            S.opt = LLM.createOptimizer( getLR(), +$( 'gradClip' ).value, +$( 'weightDecay' ).value );
-            S.step = rec.step; S.lossHist = []; S.evalHist = []; S.gradNorms = {}; S.attnData = null; S.chatCache = {};
-            clearChatHistory(); // 权重/分词器已更换,重置对话上下文
-            Backend.invalidateGPU(); // 模型已更换:GPU forward 失效
-            syncArchInputs( S.cfg );
-            $( 'tokType' ).value = loaded.tokType;
-            updateHdr(); updateArchPreview(); populateWeightSelect(); populateAttnSelects();
-            drawLoss(); drawGradBars(); drawEmb();
-            Backend.pushState();
-            addSysNote( '已载入权重集:「' + rec.name + '」为当前模型(分词器:' + ( loaded.tokType === 'bpe' ? 'BPE 子词' : '字符级' ) + ',可继续训练或对话)。' );
-          };
-          var bChat = document.createElement( 'button' ); bChat.className = 'btn green'; bChat.textContent = '去对话';
-          bChat.onclick = function ()
-          {
-            S.pendingChatSelect = rec.id;
-            document.querySelector( '#tabs button[data-tab="chat"]' ).click();
-          };
-          var bExp = document.createElement( 'button' ); bExp.className = 'btn'; bExp.textContent = '导出';
-          bExp.onclick = function () { exportRecord( rec ); };
-          var bShare = document.createElement( 'button' ); bShare.className = 'btn'; bShare.textContent = '分享包';
-          bShare.title = '生成单文件 HTML 分享包:双击打开即可对话,离线可用';
-          bShare.onclick = function () { exportSharePackage( rec ); };
-          var bDel = document.createElement( 'button' ); bDel.className = 'btn danger'; bDel.textContent = '删除';
-          bDel.onclick = async function ()
-          {
-            if ( !confirm( '删除权重集「' + rec.name + '」?' ) ) return;
-            await idbDel( rec.id ); refreshWeightList(); refreshChatSelect(); updateStorageInfo();
-          };
-          acts.appendChild( bLoad ); acts.appendChild( bChat ); acts.appendChild( bExp ); acts.appendChild( bShare ); acts.appendChild( bDel );
-          item.appendChild( acts ); box.appendChild( item );
-        } );
-        updateStorageInfo( recs );
+        if ( window.__ttllm && window.__ttllm.ModelCenter ) return window.__ttllm.ModelCenter.refresh();
+        return updateStorageInfo();
       }
-      function updateStorageInfo ( recs )
+
+      // 存储统计：IndexedDB 快照 + OPFS 开源权重 + 浏览器配额
+      async function updateStorageInfo ( recs, offline )
       {
-        if ( !recs ) { idbAll().then( updateStorageInfo ); return; }
-        var bytes = 0;
-        recs.forEach( function ( r ) { for ( var k in r.params ) bytes += r.params[ k ].length * 8; } );
-        $( 'storageInfo' ).textContent = '共 ' + recs.length + ' 个权重集,约 ' + ( bytes / 1024 ).toFixed( 1 ) + ' KB(存储于浏览器 IndexedDB,仅本地)。';
+        var el = $( 'storageInfo' ); if ( !el ) return;
+        try
+        {
+          if ( !recs ) recs = await listLocalModels();
+          if ( !offline ) offline = await listOfflineModels();
+          var lb = 0; recs.forEach( function ( r ) { lb += recordBytes( r ); } );
+          var ob = 0; offline.forEach( function ( m ) { ob += ( m.totalBytes || 0 ); } );
+          var quota = '';
+          try
+          {
+            var est = await navigator.storage.estimate();
+            var persisted = navigator.storage.persisted ? await navigator.storage.persisted() : false;
+            quota = '<div>浏览器已用 <b>' + cvBytes( est.usage ) + '</b> / 上限 ' + cvBytes( est.quota ) +
+              ' · 持久存储 ' + ( persisted ? '<b>已开启</b>' : '未授权' ) + '</div>';
+          }
+          catch ( e ) { }
+          el.innerHTML = '<div>训练快照 <b>' + recs.length + '</b> 个 · 约 <b>' + cvBytes( lb ) + '</b></div>' +
+            '<div>开源权重 <b>' + offline.length + '</b> 个 · <b>' + cvBytes( ob ) + '</b>（OPFS）</div>' + quota;
+        }
+        catch ( e ) { el.textContent = '统计失败：' + ( ( e && e.message ) || e ); }
       }
+
       function exportRecord ( rec )
       {
         var params = {}; for ( var k in rec.params ) params[ k ] = Array.from( rec.params[ k ] );
@@ -9852,29 +10491,40 @@ __ENGINE_SRC__
         S.chatCache[ id ] = loaded;
         return loaded;
       }
-      async function refreshChatSelect ()
+      // ---------------------------------------------------------------------------
+      //  模型源统一：训练快照(IndexedDB) / 开源权重(OPFS) / 当前会话
+      //  所有模型列表与下拉都从这里取，避免各处重复 idbAll + TLX_MODELS.list
+      // ---------------------------------------------------------------------------
+      async function listLocalModels ()
       {
-        var sel = $( 'chatWeightSelect' );
-        var want = S.pendingChatSelect || sel.value;
-        S.pendingChatSelect = null;
-        sel.innerHTML = '';
-        var oCur = document.createElement( 'option' ); oCur.value = '__current__'; oCur.textContent = '当前模型(训练中) · 步 ' + S.step;
-        sel.appendChild( oCur );
-        var off = officialLoaded();
-        if ( off )
-        {
-          var oOff = document.createElement( 'option' ); oOff.value = '__official__';
-          oOff.textContent = '官方权重 · ' + ( off.archId || 'safetensors' );
-          sel.appendChild( oOff );
-        }
-        var recs = await idbAll();
+        var recs = [];
+        try { recs = await idbAll(); } catch ( e ) { recs = []; }
+        recs = ( recs || [] ).filter( function ( r ) { return r && r.id; } );
         recs.sort( function ( a, b ) { return ( b.ts || 0 ) - ( a.ts || 0 ); } );
-        recs.forEach( function ( r )
-        {
-          var o = document.createElement( 'option' ); o.value = r.id; o.textContent = r.name + ' · 步 ' + r.step;
-          sel.appendChild( o );
-        } );
-        if ( want && Array.prototype.some.call( sel.options, function ( o ) { return o.value === want; } ) ) sel.value = want;
+        return recs;
+      }
+      async function listOfflineModels ()
+      {
+        try { if ( window.TLX_MODELS ) return ( await window.TLX_MODELS.list() ) || []; } catch ( e ) { }
+        return [];
+      }
+      function recordBytes ( rec )
+      {
+        var n = 0;
+        if ( rec && rec.params ) for ( var k in rec.params ) n += ( rec.params[ k ].length || 0 ) * 8;
+        return n;
+      }
+      // 对话页下拉的唯一数据源（快照 + 开源权重 + 当前模型）
+      async function chatSourceOptions ()
+      {
+        var out = [ { v: '__current__', t: '本机训练模型 · 步 ' + S.step } ];
+        var off = officialLoaded();
+        if ( off ) out.push( { v: '__official__', t: '官方权重 · ' + ( off.archId || 'safetensors' ) } );
+        var list = await listOfflineModels();
+        list.forEach( function ( m ) { out.push( { v: 'off:' + m.key, t: m.name + ' · ' + cvBytes( m.totalBytes ) } ); } );
+        var recs = await listLocalModels();
+        recs.forEach( function ( r ) { out.push( { v: r.id, t: '快照 · ' + r.name + ' · 步 ' + r.step } ); } );
+        return out;
       }
 
       // 极简 Markdown:先转义再变换(围栏代码块带复制 / 行内码 / 粗体);绝不把未转义原文拼进 innerHTML
@@ -9978,7 +10628,10 @@ __ENGINE_SRC__
         if ( !window.TLX_BRIDGE ) throw new Error( '桥接层未加载' );
         var api = window.__ENGINE__ && window.__ENGINE__.api;
         if ( !api ) throw new Error( '推理引擎未加载' );
-        var ops = ( window.TLX_INFER_DEBUG && window.TLX_INFER_DEBUG.pickOps ) ? window.TLX_INFER_DEBUG.pickOps() : api.ops;
+        // 桥接层按 CPU 语义实现（wrapForInfer 里直接 logits.data.subarray），
+        // 因此本机通道必须用 CPU 算子；用 WebGPU 算子会把 .data 变成 GPUBuffer 而崩掉。
+        var cpuOps = window.__SPARE__ && window.__SPARE__.cpuOps;
+        var ops = cpuOps || api.ops;
         var mode = ( $( 'inf-bridge-mode' ) || {} ).value || 'ops';
         var maxLen = clamp( +$( 'inf-maxlen' ).value || 256, 16, 2048 );
         if ( mode === 'exact' )
@@ -10439,7 +11092,7 @@ __ENGINE_SRC__
         { tab: 'viz', sel: '#lossCanvas', title: '⑤ 看曲线', desc: '训练 / 验证 loss 曲线 + LR 调度。开启「每 N 步验证」后,这里会实时画出验证曲线;过拟合时会出现预警。' },
         { tab: 'chat', sel: '#chatInput', title: '⑥ 和模型对话', desc: '训练几十步后,在这里输入文字与模型对话。支持流式输出、停止生成、系统提示与停止词;模型选择器里可切到快照或已加载的官方权重。 enjoy!' },
         { tab: 'studio', sel: '#t2iPrompt', title: '⑦ AI 工坊', desc: '训练成果的用武之地:文生图(SVG)、文生视频(SMIL 动画)、ReAct Agent(工具调用)、可视化工作流。每个子页都有一键填入的示例语料。' },
-        { tab: 'weights', sel: '#saveBtn', title: '⑧ 保存与分享', desc: '把模型存进浏览器(IndexedDB),或生成单文件 HTML 分享包——对方双击打开就能对话,离线可用。' },
+        { tab: 'hub', sel: '#hubSaveAs', title: '⑧ 保存与分享', desc: '在模型中心点「保存快照」把当前模型存进浏览器；「存储与分享」里还能导出 JSON，或生成单文件 HTML 分享包——对方双击打开就能对话，离线可用。' },
         { tab: 'infer', sel: '#inf-selfcheck', title: '⑨ 闭环验证 · 推理台(调试)', desc: '对话已统一到「对话」页;这里只做引擎调试:加载官方 safetensors 权重、查看计算后端,并运行「数值自检」——把同一段输入分别送进训练引擎(float64 精确前向)和推理引擎(算子图前向)对比 logits。误差在 1e-6 量级,说明训练↔推理这条链路是通的。' }
       ];
       var tour = { idx: 0, on: false, mask: null, hole: null, card: null };
@@ -10456,6 +11109,8 @@ __ENGINE_SRC__
       }
       function switchTab ( name )
       {
+        // 「模型市场 / 保存与分享」已并入模型中心，统一由 __goTab 做兼容映射
+        if ( window.__goTab ) { window.__goTab( name ); return; }
         var b = document.querySelector( '#tabs button[data-tab="' + name + '"]' );
         if ( b ) b.click();
       }
@@ -11033,6 +11688,10 @@ __ENGINE_SRC__
         modelToRecord: modelToRecord, loadModelFromRecord: loadModelFromRecord,
         idbAll: idbAll, idbPut: idbPut, idbDel: idbDel,
         refreshWeightList: refreshWeightList, refreshChatSelect: refreshChatSelect,
+        // 模型源统一入口（模型中心 / 顶栏切换器 / 对话下拉共用）
+        listLocalModels: listLocalModels, listOfflineModels: listOfflineModels,
+        chatSourceOptions: chatSourceOptions, recordBytes: recordBytes,
+        updateStorageInfo: updateStorageInfo, importRecordFile: importFile,
         syncArchInputs: syncArchInputs, encFor: encFor, decFor: decFor, buildData: buildData,
         exportRecord: exportRecord, exportSharePackage: exportSharePackage, download: download,
         getLR: getLR, currentLR: currentLR, rebuildModel: rebuildModel,
@@ -11061,9 +11720,721 @@ __ENGINE_SRC__
         addSysNote( '欢迎使用 TinyTrainableLLM v3!已用示例语料初始化。流程:⓪ 模型中心(选用 / 保存模型)→ ① 数据 → ② 架构 → ③ 训练(预训练 / 后训练 SFT / 强化学习 / P2P 联邦训练,CPU 工作线程自动切换)→ ④ 可视化 → ⑤ 对话(流式 / beam / 多候选 / KV cache / WebGPU)→ ⑥ AI 工坊(文生图 / 文生视频 / Agent / 工作流)→ ⑦ 权重(保存 / 分享包)→ ⑧ 推理台(本机权重走算子图推理 / 官方 safetensors 权重,含训练↔推理数值自检)。单文件离线可用,首次使用点顶部 ⚡ 一键试跑;训练几步后到 ⑧ 推理台点「运行自检」可验证闭环。' );
         drawArchSvg( S.cfg );
         importConfigFromHash(); // v2:须在 init 末尾导入(buildData/rebuildModel 均已完成),否则导入值会被 applyPreset('minillama') 覆盖
-        if ( !tourSeen() ) setTimeout( function () { tourStart(); }, 600 ); // 首次访问自动播放
+        // 聊天优先：不再自动弹引导（首次进来就该能直接说话）；需要时点右上角 ❓ 手动播放
+        // if ( !tourSeen() ) setTimeout( function () { tourStart(); }, 600 );
       }
+      /* ==================================================================
+         Chat v2 · 会话 / 消息流 / 模型源（覆盖上方旧版聊天实现）
+         - 多会话存 IndexedDB（tlx-chat-v1），刷新后重绘，不再"界面空但上下文还在"
+         - 消息级操作：复制 / 重发 / 重新生成 / 删除
+         - 模型源三态：本机训练模型 · 已下载开源模型(off:key) · 快照
+         - 本机模型每轮重置会话：上下文由 chatContext 自己拼，避免历史被重复喂入
+         ================================================================== */
+      var CV2 = { suppress: false, installed: false };
+      var CUR = null;          // 当前会话
+      var SESS = [];           // 会话列表
+
+      // ---------------- IndexedDB：会话 ----------------
+      function cvDb ()
+      {
+        return new Promise( function ( res, rej )
+        {
+          var rq = indexedDB.open( 'tlx-chat-v1', 1 );
+          rq.onupgradeneeded = function ()
+          {
+            var db = rq.result;
+            if ( !db.objectStoreNames.contains( 'sessions' ) ) db.createObjectStore( 'sessions', { keyPath: 'id' } );
+          };
+          rq.onsuccess = function () { res( rq.result ); };
+          rq.onerror = function () { rej( rq.error ); };
+        } );
+      }
+      function cvStore ( mode )
+      {
+        return cvDb().then( function ( db ) { return db.transaction( 'sessions', mode ).objectStore( 'sessions' ); } );
+      }
+      function cvAllSess ()
+      {
+        return cvStore( 'readonly' ).then( function ( st )
+        {
+          return new Promise( function ( res )
+          {
+            var rq = st.getAll();
+            rq.onsuccess = function () { res( rq.result || [] ); };
+            rq.onerror = function () { res( [] ); };
+          } );
+        } );
+      }
+      function cvSaveSess ( s )
+      {
+        if ( !s ) return Promise.resolve();
+        s.ts = Date.now();
+        return cvStore( 'readwrite' ).then( function ( st ) { st.put( s ); } ).catch( function () { } );
+      }
+      function cvDelSess ( id )
+      {
+        return cvStore( 'readwrite' ).then( function ( st ) { st.del( id ); } ).catch( function () { } );
+      }
+
+      // ---------------- 工具 ----------------
+      function cvUid ( p ) { return p + Date.now().toString( 36 ) + Math.random().toString( 36 ).slice( 2, 5 ); }
+      function cvBytes ( n )
+      {
+        if ( !n && n !== 0 ) return '—';
+        var u = [ 'B', 'KB', 'MB', 'GB', 'TB' ], i = 0;
+        while ( n >= 1024 && i < u.length - 1 ) { n /= 1024; i++; }
+        return ( i === 0 ? n : n.toFixed( 1 ) ) + ' ' + u[ i ];
+      }
+      function cvMsg ( role, text, extra )
+      {
+        var m = { id: cvUid( 'm' ), role: role, text: text || '', ts: Date.now() };
+        if ( extra ) for ( var k in extra ) m[ k ] = extra[ k ];
+        return m;
+      }
+      function cvEnsureSession ()
+      {
+        if ( CUR ) return CUR;
+        CUR = { id: cvUid( 's' ), title: '新对话', ts: Date.now(), msgs: [] };
+        SESS.push( CUR );
+        return CUR;
+      }
+      function cvSessionNew ()
+      {
+        CUR = { id: cvUid( 's' ), title: '新对话', ts: Date.now(), msgs: [] };
+        SESS.push( CUR );
+        cvSaveSess( CUR );
+        chatSessions = {}; // 引擎会话按线程隔离，切换即失效
+        cvRenderSessions(); cvRenderThread(); cvFocus();
+      }
+      function cvSessionRemove ( id )
+      {
+        SESS = SESS.filter( function ( s ) { return s.id !== id; } );
+        cvDelSess( id );
+        if ( CUR && CUR.id === id )
+        {
+          CUR = SESS.filter( function ( s ) { return s.msgs && s.msgs.length; } )[ 0 ] || SESS[ 0 ] || null;
+          chatSessions = {};
+          if ( !CUR ) cvSessionNew(); else { cvRenderSessions(); cvRenderThread(); }
+        }
+        else cvRenderSessions();
+      }
+      function cvSelectSession ( id )
+      {
+        var s = SESS.filter( function ( x ) { return x.id === id; } )[ 0 ];
+        if ( !s ) return;
+        CUR = s; chatSessions = {};
+        cvRenderSessions(); cvRenderThread(); cvFocus();
+      }
+      function cvFocus () { var i = $( 'chatInput' ); if ( i ) i.focus(); }
+      function cvStick ()
+      {
+        var log = $( 'chatLog' ); if ( !log ) return;
+        var near = log.scrollHeight - log.scrollTop - log.clientHeight < 140;
+        if ( near ) log.scrollTop = log.scrollHeight;
+      }
+      function cvScrollBottom () { var l = $( 'chatLog' ); if ( l ) l.scrollTop = l.scrollHeight; }
+
+      // ---------------- 渲染：会话栏 ----------------
+      function cvRenderSessions ()
+      {
+        var box = $( 'sessionList' );
+        if ( !box ) return;
+        box.innerHTML = '';
+        var list = SESS.slice().sort( function ( a, b ) { return ( b.ts || 0 ) - ( a.ts || 0 ); } );
+        if ( !list.length )
+        {
+          var e = document.createElement( 'div' );
+          e.className = 'cv-sempty';
+          e.textContent = '还没有对话。点上方「＋ 新对话」开始。';
+          box.appendChild( e );
+          return;
+        }
+        list.forEach( function ( s )
+        {
+          var d = document.createElement( 'div' );
+          d.className = 'cv-sitem' + ( CUR && CUR.id === s.id ? ' active' : '' );
+          var t = document.createElement( 'span' ); t.className = 't';
+          t.textContent = ( s.title || '新对话' ) + ( s.msgs && s.msgs.length ? '' : '' );
+          var x = document.createElement( 'button' ); x.className = 'x'; x.textContent = '✕'; x.title = '删除会话';
+          x.onclick = function ( ev ) { ev.stopPropagation(); cvSessionRemove( s.id ); };
+          d.onclick = function () { cvSelectSession( s.id ); };
+          d.appendChild( t ); d.appendChild( x );
+          box.appendChild( d );
+        } );
+      }
+
+      // ---------------- 渲染：消息 ----------------
+      function cvEmpty ()
+      {
+        var log = $( 'chatLog' ); if ( !log ) return;
+        var wrap = document.createElement( 'div' );
+        wrap.className = 'cv-empty';
+        var h = document.createElement( 'div' ); h.className = 'big'; h.textContent = '开始一段对话';
+        var p = document.createElement( 'p' );
+        p.textContent = '当前连接的是本机模型。想用 Qwen / Llama 这类真正的开源模型，点下方「模型」下载权重——下载后保存在浏览器里，断网也能用。';
+        var sugs = document.createElement( 'div' ); sugs.className = 'cv-sugs';
+        [ '你好，介绍下你自己', '用三句话解释什么是注意力机制', '写一个 Python 快排', '帮我起 5 个产品名' ].forEach( function ( s )
+        {
+          var b = document.createElement( 'button' ); b.className = 'cv-sug'; b.textContent = s;
+          b.onclick = function () { var i = $( 'chatInput' ); i.value = s; cvAutoGrow(); cvFocus(); };
+          sugs.appendChild( b );
+        } );
+        wrap.appendChild( h ); wrap.appendChild( p ); wrap.appendChild( sugs );
+        log.appendChild( wrap );
+      }
+      function cvActs ( m )
+      {
+        var acts = document.createElement( 'div' );
+        acts.className = 'cv-acts';
+        function mk ( label, act )
+        {
+          var b = document.createElement( 'button' );
+          b.type = 'button'; b.textContent = label; b.dataset.act = act; b.dataset.mid = m.id;
+          return b;
+        }
+        acts.appendChild( mk( '复制', 'copy' ) );
+        if ( m.role === 'user' ) acts.appendChild( mk( '重发', 'resend' ) );
+        if ( m.role === 'bot' )
+        {
+          acts.appendChild( mk( '重新生成', 'regen' ) );
+          acts.appendChild( mk( '删除', 'del' ) );
+        }
+        return acts;
+      }
+      function cvNode ( m )
+      {
+        var log = $( 'chatLog' );
+        var d = document.createElement( 'div' );
+        d.className = 'cv-msg ' + m.role;
+        if ( m.err ) d.classList.add( 'err' );
+        d.dataset.id = m.id;
+        if ( m.role === 'sys' )
+        {
+          var sb = document.createElement( 'div' ); sb.className = 'cv-bubble'; sb.textContent = m.text;
+          d.appendChild( sb ); log.appendChild( d ); return d;
+        }
+        var r = document.createElement( 'div' );
+        r.className = 'cv-role'; r.textContent = ( m.role === 'user' ? '你' : '模型' );
+        var b = document.createElement( 'div' );
+        b.className = 'cv-bubble' + ( m.md ? ' md' : '' );
+        if ( m.md ) b.innerHTML = mdRender( m.text ); else b.textContent = m.text;
+        d.appendChild( r ); d.appendChild( b );
+        var mt = document.createElement( 'div' ); mt.className = 'cv-meta'; mt.textContent = m.meta || '';
+        d.appendChild( mt );
+        d.appendChild( cvActs( m ) );
+        log.appendChild( d );
+        return d;
+      }
+      function cvRenderThread ()
+      {
+        var log = $( 'chatLog' );
+        if ( !log ) return;
+        log.innerHTML = '';
+        if ( !CUR || !CUR.msgs || !CUR.msgs.length ) { cvEmpty(); return; }
+        CUR.msgs.forEach( function ( m ) { cvNode( m ); } );
+        cvScrollBottom();
+      }
+      function cvAppend ( m )
+      {
+        cvEnsureSession();
+        CUR.msgs.push( m );
+        cvSaveSess( CUR );
+        var log = $( 'chatLog' );
+        var empty = log && log.querySelector( '.cv-empty' );
+        if ( empty ) empty.remove();
+        return cvNode( m );
+      }
+
+      // ---------------- 系统提示（瞬态，不写历史） ----------------
+      function addSysNote ( t )
+      {
+        if ( CV2.suppress ) return;
+        var log = $( 'chatLog' );
+        if ( !log || !CUR || !CUR.msgs.length ) return;
+        var d = document.createElement( 'div' );
+        d.className = 'cv-msg sys';
+        var b = document.createElement( 'div' ); b.className = 'cv-bubble'; b.textContent = t;
+        d.appendChild( b ); log.appendChild( d );
+        cvScrollBottom();
+      }
+
+      // ---------------- 生成参数 / 会话缓存 ----------------
+      function cvIsOff ( src ) { return !!src && src.indexOf( 'off:' ) === 0; }
+      function cvArchStyle ( archId )
+      {
+        try
+        {
+          var a = window.__ENGINE__.api.getArchitecture( archId );
+          return ( a && a.chatStyle ) || 'qwen';
+        } catch ( e ) { return 'qwen'; }
+      }
+      function cvHistoryMsgs ()
+      {
+        if ( !CUR ) return [];
+        return CUR.msgs.filter( function ( m )
+        {
+          if ( m.role === 'sys' ) return false;
+          if ( m.role === 'bot' && !m.text ) return false; // 占位气泡
+          return true;
+        } );
+      }
+      function cvLlama3Prompt ()
+      {
+        var sys = ( ( $( 'chatSys' ) || {} ).value || '' ).trim() || 'You are a helpful assistant.';
+        var p = '<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n' + sys + '<|eot_id|>';
+        cvHistoryMsgs().forEach( function ( m )
+        {
+          p += '<|start_header_id|>' + ( m.role === 'bot' ? 'assistant' : 'user' ) + '<|end_header_id|>\n\n' + m.text + '<|eot_id|>';
+        } );
+        p += '<|start_header_id|>assistant<|end_header_id|>\n\n';
+        return p;
+      }
+      function cvLocalPrompt ( loaded, text )
+      {
+        var sys = ( ( $( 'chatSys' ) || {} ).value || '' ).trim();
+        var cap = loaded.model.cfg.maxSeqLen;
+        var reserve = Math.max( 4, Math.min( 16, cap >> 3 ) );
+        var used = encFor( loaded, text ).length + ( sys ? encFor( loaded, sys ).length + 1 : 0 );
+        var hist = cvHistoryMsgs();
+        if ( hist.length && hist[ hist.length - 1 ].role === 'user' && hist[ hist.length - 1 ].text === text ) hist.pop();
+        var kept = [];
+        for ( var i = hist.length - 1; i >= 0; i-- )
+        {
+          var l = encFor( loaded, hist[ i ].text ).length + 1;
+          if ( used + l > cap - reserve ) break;
+          kept.unshift( hist[ i ].text ); used += l;
+        }
+        var parts = ( sys ? [ sys ] : [] ).concat( kept, [ text ] );
+        return { text: parts.join( '\n' ), used: used, cap: cap, trimmed: hist.length - kept.length };
+      }
+      function cvOffSession ( src, info )
+      {
+        var s = chatSessions[ src ];
+        if ( !s )
+        {
+          s = ( window.__ENGINE__.api ).makeSession( info.model, info.tokenizer, { maxLen: 3072, archId: info.archId } );
+          chatSessions[ src ] = s;
+        }
+        return s;
+      }
+
+      // ---------------- 生成 ----------------
+      function cvStatus ( t, kind )
+      {
+        var el = $( 'cvStatus' );
+        if ( !el ) return;
+        el.textContent = t;
+        el.style.color = kind === 'bad' ? 'var(--bad)' : ( kind === 'ok' ? 'var(--accent2)' : '' );
+      }
+      async function cvGenOff ( src, userText, onTok )
+      {
+        var key = src.slice( 4 );
+        var M = window.TLX_MODELS;
+        if ( !M ) throw new Error( '模型模块未就绪，请刷新页面' );
+        var info = await M.ensure( key, function ( p )
+        {
+          cvStatus( p && p.message ? p.message : '加载中…' );
+        } );
+        cvStatus( info.name + ' · 就绪', 'ok' );
+        var s = cvOffSession( src, info );
+        var opts = samplerOpts();
+        opts.onToken = onTok;
+        if ( cvArchStyle( info.archId ) === 'llama3' )
+        {
+          s.reset();
+          var ids = info.tokenizer.encode( cvLlama3Prompt() );
+          opts.stopSequences = ( opts.stopSequences || [] ).concat( [ '<|eot_id|>' ] );
+          return await s.generate( ids, opts );
+        }
+        return await s.chat( [ { role: 'user', content: userText } ], opts );
+      }
+      async function cvGenLocal ( src, userText, onTok )
+      {
+        var loaded = await ensureChatModel();
+        if ( !loaded ) throw new Error( '无法加载所选权重集' );
+        var prompt = cvLocalPrompt( loaded, userText );
+        var ids = encFor( loaded, prompt.text );
+        window.__cvDbg = { src: src, prompt: prompt.text, len: ids.length, cap: prompt.cap, tokType: loaded.tokType, vs: loaded.vocab && loaded.vocab.vocabSize };
+        if ( !ids.length ) throw new Error( '提示中的字符不在该权重集的词表内' );
+        if ( prompt.trimmed > 0 ) cvStatus( '上下文超限，已忽略 ' + prompt.trimmed + ' 条早期消息' );
+        updateCtxBar( ids.length, prompt.cap );
+        var s = localSession( loaded );
+        s.reset(); // 上下文每轮自行拼装，必须重置，否则历史会被重复追加
+        var opts = samplerOpts();
+        // 生成长度不能超过模型自己的窗口：超出窗口的部分是"没学过的位置"，只会复读
+        var room = Math.max( 4, loaded.model.cfg.maxSeqLen - ids.length - 1 );
+        if ( opts.maxNewTokens > room ) opts.maxNewTokens = room;
+        opts.onToken = onTok;
+        return await s.generate( ids, opts );
+      }
+      async function cvRun ( userText )
+      {
+        var src = chatSrc();
+        var stream = $( 'chatStream' ).checked;
+        var bot = cvMsg( 'bot', '' );
+        var el = cvAppend( bot );
+        var body = el.querySelector( '.cv-bubble' );
+        body.classList.add( 'cv-cur' );
+        chatBusy = true; chatAbort.aborted = false;
+        $( 'chatSend' ).disabled = true;
+        var stopBtn = $( 'chatStopGen' ); if ( stopBtn ) stopBtn.style.display = '';
+        var t0 = performance.now(), live = '';
+        function onTok ( delta, full )
+        {
+          if ( !stream ) return;
+          if ( full !== undefined && full !== null ) live = String( full );
+          else if ( delta && delta.text !== undefined ) live += delta.text;
+          else live += String( delta );
+          body.textContent = live; cvStick();
+        }
+        try
+        {
+          var r = cvIsOff( src )
+            ? await cvGenOff( src, userText, onTok )
+            : await cvGenLocal( src, userText, onTok );
+          var txt = ( r && r.text !== undefined ) ? String( r.text ) : live;
+          txt = txt.replace( /^\s+/, '' );
+          if ( !txt ) txt = '（模型没有产出内容：可能训练步数不足，或词表里没有相关字符）';
+          bot.text = txt; bot.md = true;
+          body.classList.remove( 'cv-cur' );
+          body.classList.add( 'md' );
+          body.innerHTML = mdRender( txt );
+          var dt = ( ( r && r.stats && r.stats.timeMs ) ? r.stats.timeMs : ( performance.now() - t0 ) ) / 1000;
+          var nTok = ( r && r.stats && r.stats.newTokens ) || 0;
+          bot.meta = ( nTok ? nTok + ' tok · ' : '' ) + dt.toFixed( 2 ) + 's' +
+            ( nTok ? ' · ' + ( nTok / dt ).toFixed( 1 ) + ' tok/s' : '' ) +
+            ( r && r.finishReason && r.finishReason !== 'eos' ? ' · ' + r.finishReason : '' );
+          var metaEl = el.querySelector( '.cv-meta' );
+          if ( metaEl ) metaEl.textContent = bot.meta;
+          cvStatus( chatSrc() === '__current__' ? '本机模型' : '就绪', 'ok' );
+        }
+        catch ( e )
+        {
+          var msg = ( e && e.message ) ? e.message : String( e );
+          bot.err = true; bot.text = '生成失败：' + msg;
+          body.classList.remove( 'cv-cur' );
+          body.textContent = bot.text;
+          el.classList.add( 'err' );
+          cvStatus( '生成失败', 'bad' );
+          console.error( e );
+        }
+        finally
+        {
+          chatBusy = false;
+          $( 'chatSend' ).disabled = false;
+          if ( stopBtn ) stopBtn.style.display = 'none';
+          chatAbort.aborted = false;
+          cvSaveSess( CUR );
+          cvStick();
+        }
+      }
+
+      // ---------------- 对外入口 ----------------
+      async function chatSend ()
+      {
+        if ( chatBusy ) return;
+        var input = $( 'chatInput' );
+        var text = ( input.value || '' ).trim();
+        if ( !text ) return;
+        cvEnsureSession();
+        input.value = ''; cvAutoGrow();
+        var um = cvMsg( 'user', text );
+        cvAppend( um );
+        if ( !CUR.title || CUR.title === '新对话' )
+        {
+          CUR.title = text.length > 20 ? text.slice( 0, 20 ) + '…' : text;
+          cvRenderSessions();
+        }
+        await cvRun( text );
+      }
+      async function cvRegenerate ( mid )
+      {
+        if ( chatBusy || !CUR ) return;
+        var i = -1;
+        for ( var k = 0; k < CUR.msgs.length; k++ ) if ( CUR.msgs[ k ].id === mid ) { i = k; break; }
+        if ( i < 0 ) return;
+        var userText = '';
+        for ( var j = i - 1; j >= 0; j-- ) if ( CUR.msgs[ j ].role === 'user' ) { userText = CUR.msgs[ j ].text; break; }
+        if ( !userText ) return;
+        CUR.msgs = CUR.msgs.slice( 0, i ); // 丢到目标消息之前
+        chatSessions = {};
+        cvSaveSess( CUR );
+        cvRenderThread();
+        await cvRun( userText );
+      }
+      async function cvResend ( mid )
+      {
+        if ( chatBusy || !CUR ) return;
+        var m = CUR.msgs.filter( function ( x ) { return x.id === mid; } )[ 0 ];
+        if ( !m || m.role !== 'user' ) return;
+        cvRenderThread();
+        await cvRun( m.text );
+      }
+      function cvDeleteMsg ( mid )
+      {
+        if ( !CUR ) return;
+        CUR.msgs = CUR.msgs.filter( function ( x ) { return x.id !== mid; } );
+        chatSessions = {};
+        cvSaveSess( CUR );
+        cvRenderThread();
+      }
+
+      // ---------------- 覆盖旧版：选择器 / 设置 / 导出 ----------------
+      async function refreshChatSelect ()
+      {
+        var sel = $( 'chatWeightSelect' );
+        if ( !sel ) return;
+        var want = S.pendingChatSelect || sel.value || lsGet( 'ttllm.chatSrc', '' );
+        S.pendingChatSelect = null;
+        var opts = await chatSourceOptions();
+        sel.innerHTML = opts.map( function ( o )
+        {
+          return '<option value="' + escapeHtml( o.v ) + '">' + escapeHtml( o.t ) + '</option>';
+        } ).join( '' );
+        if ( want && opts.some( function ( o ) { return o.v === want; } ) ) sel.value = want;
+        else if ( want && want !== '__current__' ) { try { localStorage.removeItem( 'ttllm.chatSrc' ); } catch ( e ) { } }
+        cvUpdateSrcPill();
+        // 模型中心的「对话使用」下拉是同一份数据的镜像
+        if ( window.__ttllm && window.__ttllm.ModelCenter ) window.__ttllm.ModelCenter.syncChat();
+      }
+      function cvUpdateSrcPill ()
+      {
+        var sel = $( 'chatWeightSelect' ), pill = $( 'cvStatus' );
+        if ( !sel || !pill || chatBusy ) return;
+        var v = sel.value || '';
+        if ( v === '__current__' ) cvStatus( '本机模型 · 步 ' + S.step );
+        else if ( cvIsOff( v ) ) cvStatus( '开源模型' );
+        else cvStatus( '快照' );
+      }
+      async function loadChatSettings ()
+      {
+        $( 'chatSys' ).value = lsGet( 'ttllm.chatSys', '' );
+        $( 'chatStop' ).value = lsGet( 'ttllm.chatStops', '' );
+        $( 'chatMem' ).checked = lsGet( 'ttllm.chatMem', '1' ) === '1';
+        try { SESS = await cvAllSess(); } catch ( e ) { SESS = []; }
+        SESS = SESS.filter( function ( s ) { return s && s.id && s.msgs; } );
+        SESS.sort( function ( a, b ) { return ( b.ts || 0 ) - ( a.ts || 0 ); } );
+        if ( SESS.length ) CUR = SESS[ 0 ];
+        else { CUR = { id: cvUid( 's' ), title: '新对话', ts: Date.now(), msgs: [] }; SESS = [ CUR ]; cvSaveSess( CUR ); }
+        S.chatHistory = CUR.msgs.filter( function ( m ) { return m.role !== 'sys'; } )
+          .map( function ( m ) { return { role: m.role, text: m.text }; } );
+        cvRenderSessions(); cvRenderThread();
+        CV2.suppress = true;
+        setTimeout( function () { CV2.suppress = false; }, 900 );
+      }
+      function clearChatHistory ()
+      {
+        S.chatHistory = [];
+        chatSessions = {};
+      }
+      function cvToast ( m, k )
+      {
+        try { if ( window.TLX && window.TLX.toast ) window.TLX.toast( m, k ); } catch ( e ) { }
+      }
+      function exportChat ()
+      {
+        if ( !CUR || !CUR.msgs.length ) { cvToast( '还没有可导出的对话' ); return; }
+        var md = '# ' + ( CUR.title || '对话' ) + '\n\n';
+        CUR.msgs.forEach( function ( m )
+        {
+          if ( m.role === 'sys' ) return;
+          md += ( m.role === 'user' ? '## 你\n\n' : '## 模型\n\n' ) + m.text + '\n\n';
+        } );
+        download( md, 'tlx-chat-' + CUR.id + '.md', 'text/markdown' );
+        addSysNote( '已导出为 Markdown' );
+      }
+      function cvAutoGrow ()
+      {
+        var t = $( 'chatInput' );
+        if ( !t ) return;
+        t.style.height = 'auto';
+        t.style.height = Math.min( 176, t.scrollHeight ) + 'px';
+      }
+
+      // ---------------- 对话 → 训练数据（SFT） ----------------
+      function cvCollectPairs ()
+      {
+        var out = [];
+        var list = SESS.length ? SESS : ( CUR ? [ CUR ] : [] );
+        list.forEach( function ( s )
+        {
+          var ms = ( s.msgs || [] ).filter( function ( m ) { return m.role === 'user' || m.role === 'bot'; } );
+          for ( var i = 0; i < ms.length - 1; i++ )
+            if ( ms[ i ].role === 'user' && ms[ i + 1 ].role === 'bot' && ms[ i + 1 ].text )
+              out.push( { p: ms[ i ].text, r: ms[ i + 1 ].text } );
+        } );
+        return out;
+      }
+      function cvToTrain ()
+      {
+        var pairs = cvCollectPairs();
+        if ( !pairs.length ) { cvToast( '还没有可用的问答对（至少需要一轮「你 → 模型」）' ); return; }
+        var lines = pairs.map( function ( x )
+        {
+          var p = x.p.replace( /\s*\n\s*/g, ' ' ).trim();
+          var r = x.r.replace( /\s*\n\s*/g, ' ' ).trim();
+          return p && r ? p + ' => ' + r : '';
+        } ).filter( Boolean );
+        if ( !lines.length ) { cvToast( '问答对为空' ); return; }
+        var ta = $( 'sftData' );
+        if ( !ta ) { cvToast( '训练台未就绪' ); return; }
+        ta.value = ( ta.value.trim() ? ta.value.trim() + '\n' : '' ) + lines.join( '\n' );
+        switchTab( 'train' );
+        if ( window.__ttllmV3SetStage ) window.__ttllmV3SetStage( 'sft' );
+        var btn = $( 'sftBuildBtn' );
+        if ( btn ) btn.click();
+        var n = ( S.sftPairs || [] ).length;
+        var win = S.cfg ? S.cfg.maxSeqLen : 0;
+        var tooLong = ( S.sftPairs || [] ).filter( function ( pr ) { return pr.p.length + pr.r.length > win + 1; } ).length;
+        if ( !n ) cvToast( '对话里有词表外字符（当前词表 ' + ( S.vocab ? S.vocab.vocabSize : 0 ) + ' token）· 点「适配词表」把文本并入语料后重试' );
+        else if ( tooLong > 0 ) cvToast( '已导入 ' + n + ' 对，其中 ' + tooLong + ' 对超过模型窗口(' + win + ' token) 会被截断 · 建议先到架构页把上下文长度调大并重建模型', 'warn' );
+        else cvToast( '已导入 ' + n + ' 条指令对 · 点「自动训练」即可微调，完成后到模型库保存快照', 'ok' );
+      }
+
+      // ---------------- 安装：DOM 补强与重新绑定 ----------------
+      function cvInstall ()
+      {
+        if ( CV2.installed ) return;
+        CV2.installed = true;
+        var grid = document.querySelector( '#panel-chat .chatview-grid' );
+        var log = $( 'chatLog' );
+        if ( log ) log.className = 'cv-thread';
+
+        // 会话栏
+        if ( grid && !$( 'sessionList' ) )
+        {
+          var rail = document.createElement( 'aside' );
+          rail.className = 'cv-rail';
+          rail.innerHTML =
+            '<div class="cv-rail-head"><button class="btn primary" id="newSessionBtn">＋ 新对话</button></div>' +
+            '<div class="cv-slist" id="sessionList"></div>' +
+            '<div class="cv-rail-foot"><button class="btn" id="openModelsBtn">🧩 模型 · 下载 / 管理</button>' +
+            '<span class="cv-srcpill" id="cvStatus">就绪</span></div>';
+          grid.insertBefore( rail, grid.firstChild );
+        }
+        // 输入区外壳
+        var ta = $( 'chatInput' );
+        if ( ta && ta.parentNode && !ta.parentNode.classList.contains( 'cv-box' ) )
+        {
+          ta.parentNode.classList.add( 'cv-box' );
+          var tools = document.querySelector( '#panel-chat .composer-tools' );
+          if ( tools ) tools.classList.add( 'cv-tools' );
+        }
+        // 「用作训练数据」：把对话里的问答对灌进训练台 SFT
+        var toolsBar = document.querySelector( '#panel-chat .composer-tools' );
+        if ( toolsBar && !$( 'chatToTrain' ) )
+        {
+          var tt = document.createElement( 'button' );
+          tt.className = 'btn ghost';
+          tt.id = 'chatToTrain';
+          tt.textContent = '⤓ 用作训练数据';
+          tt.title = '把对话里的问答对送进训练台的后训练(SFT)，用于微调当前模型';
+          tt.onclick = cvToTrain;
+          toolsBar.insertBefore( tt, $( 'paramsToggle' ) || null );
+          var ft = document.createElement( 'button' );
+          ft.className = 'btn ghost';
+          ft.id = 'chatFinetune';
+          ft.textContent = '🎛 微调开源模型';
+          ft.title = '用你的对话对已下载的开源模型做 LoRA 微调';
+          ft.onclick = function () { if ( window.TLX_FINETUNE ) window.TLX_FINETUNE.open(); else cvToast( '微调模块未就绪' ); };
+          toolsBar.insertBefore( ft, $( 'paramsToggle' ) || null );
+        }
+        // 换掉旧监听（clone 会丢弃 addEventListener）
+        [ 'chatSend', 'chatStopGen', 'chatClear', 'chatExportBtn', 'chatWeightSelect', 'chatReloadBtn', 'chatInput', 'newChatBtn' ].forEach( function ( id )
+        {
+          var el = $( id );
+          if ( !el || !el.parentNode ) return;
+          var c = el.cloneNode( true );
+          el.parentNode.replaceChild( c, el );
+        } );
+
+        $( 'chatSend' ).onclick = function () { void chatSend(); };
+        $( 'chatStopGen' ).onclick = function () { chatAbort.aborted = true; };
+        $( 'chatClear' ).onclick = function ()
+        {
+          if ( !CUR ) return;
+          CUR.msgs = []; chatSessions = {}; cvSaveSess( CUR );
+          cvRenderThread(); cvStatus( '已清空' );
+        };
+        $( 'chatExportBtn' ).onclick = exportChat;
+        $( 'chatWeightSelect' ).onchange = function ()
+        {
+          chatSessions = {};
+          var v = this.value || '';
+          S.pendingChatSelect = v;
+          lsSet( 'ttllm.chatSrc', v );
+          cvUpdateSrcPill();
+          if ( cvIsOff( v ) ) cvStatus( '开源模型 · 首次发送时加载' );
+        };
+        $( 'chatReloadBtn' ).onclick = function () { void refreshChatSelect(); };
+        var nb = $( 'newSessionBtn' );
+        if ( nb ) nb.onclick = function () { cvSessionNew(); };
+        var om = $( 'openModelsBtn' );
+        if ( om ) om.onclick = function ()
+        {
+          if ( window.TLX_MODELHUB ) window.TLX_MODELHUB.open();
+          else if ( window.TLX_MODELS ) window.TLX_MODELS.open();
+          else cvToast( '模型模块未就绪' );
+        };
+        var sc = $( 'newChatBtn' );
+        if ( sc ) sc.onclick = function () { cvSessionNew(); var b = document.querySelector( '#tabs button[data-tab="chat"]' ); if ( b ) b.click(); };
+
+        // 输入：Enter 发送 / Shift+Enter 换行；自动增高
+        var inp = $( 'chatInput' );
+        inp.addEventListener( 'keydown', function ( e )
+        {
+          if ( e.key === 'Enter' && !e.shiftKey && !e.isComposing )
+          {
+            e.preventDefault();
+            void chatSend();
+          }
+        } );
+        inp.addEventListener( 'input', cvAutoGrow );
+
+        // 消息区：复制 / 重发 / 重新生成 / 删除 + 代码块复制
+        $( 'chatLog' ).addEventListener( 'click', function ( e )
+        {
+          var t = e.target;
+          if ( !t || !t.dataset ) return;
+          if ( t.classList.contains( 'md-copy' ) )
+          {
+            var code = t.parentNode ? t.parentNode.querySelector( 'code' ) : null;
+            if ( code && navigator.clipboard )
+              navigator.clipboard.writeText( code.textContent ).then( function ()
+              {
+                t.textContent = '已复制';
+                setTimeout( function () { t.textContent = '复制'; }, 1200 );
+              } );
+            return;
+          }
+          var act = t.dataset.act, mid = t.dataset.mid;
+          if ( !act || !mid ) return;
+          if ( act === 'copy' )
+          {
+            var m = CUR && CUR.msgs.filter( function ( x ) { return x.id === mid; } )[ 0 ];
+            if ( m && navigator.clipboard ) navigator.clipboard.writeText( m.text );
+            t.textContent = '已复制';
+            setTimeout( function () { t.textContent = '复制'; }, 1000 );
+          }
+          else if ( act === 'regen' ) void cvRegenerate( mid );
+          else if ( act === 'resend' ) void cvResend( mid );
+          else if ( act === 'del' ) cvDeleteMsg( mid );
+        } );
+
+        window.__cvStatus = cvStatus; // 供模型模块回报「从本地加载 / 就绪」
+        // 落地即对话：顶栏文案同步（不依赖点击 tab）
+        try
+        {
+          var vt = $( 'viewTitle' ), vs = $( 'viewSub' );
+          if ( vt && vs ) { vt.textContent = '对话'; vs.textContent = '与当前模型 / 快照 / 已下载模型对话 · 流式输出、可停止、可导出'; }
+        } catch ( e ) { }
+        cvUpdateSrcPill();
+        void refreshChatSelect();
+      }
+
       init();
+      // DOM 补强放在所有脚本执行之后（最后一段补丁层也会绑定部分按钮）
+      setTimeout( cvInstall, 0 );
     } )();
     // ============================================================================
     //  TinyTrainableLLM v3 — 模型中心 / 训练阶段(SFT · RL)/ P2P 联邦训练 / AI 工坊
@@ -11090,155 +12461,488 @@ __ENGINE_SRC__
 
       // ============================================================================
       //  一、模型中心
+      //  - 一个数据源：IndexedDB 快照 + OPFS 开源权重 → 统一 rows
+      //  - 一条选用路径：adoptRecord() / selectChatSource()（全站复用）
+      //  - 一个卡片渲染：ModelCenter.cardHtml()（首页「最近的模型」也复用）
       // ============================================================================
       var STAGE_NAMES = { pretrain: '预训练', sft: '后训练 SFT', rl: '强化学习', p2p: 'P2P 联邦' };
       var STAGE_CLS = { pretrain: 's-pt', sft: 's-sft', rl: 's-rl', p2p: 's-p2p' };
 
+      function setText ( id, text ) { var e = $( id ); if ( e ) e.textContent = text; }
+      function archLabel ( cfg )
+      {
+        if ( !cfg ) return '—';
+        var parts = [];
+        if ( cfg.norm ) parts.push( cfg.norm );
+        if ( cfg.pos ) parts.push( cfg.pos );
+        if ( cfg.attn ) parts.push( cfg.attn );
+        if ( cfg.ffn ) parts.push( cfg.ffn );
+        return parts.length ? parts.join( '/' ).toUpperCase() : '—';
+      }
+      function bytesFmt ( n )
+      {
+        if ( n === undefined || n === null || isNaN( n ) ) return '—';
+        if ( n < 1024 ) return Math.round( n ) + ' B';
+        var u = [ 'KB', 'MB', 'GB', 'TB' ], i = -1;
+        do { n /= 1024; i++; } while ( n >= 1024 && i < u.length - 1 );
+        return ( n >= 100 ? n.toFixed( 0 ) : n.toFixed( 1 ) ) + ' ' + u[ i ];
+      }
+      function recordBytes ( rec )
+      {
+        var n = 0;
+        if ( rec && rec.params ) for ( var k in rec.params ) n += ( rec.params[ k ].length || 0 ) * 8;
+        return n;
+      }
+      function toast ( msg, kind )
+      {
+        try
+        {
+          if ( window.TLX && window.TLX.toast ) window.TLX.toast( msg, kind );
+          else T.addSysNote( msg );
+        } catch ( e ) { }
+      }
+
+      // ---------------------------------------------------------------- 当前模型
       function updateHub ()
       {
         var name = $( 'hubActiveName' ), meta = $( 'hubActiveMeta' );
+        if ( !name || !meta ) return;
+        var st = S.stage || 'pretrain';
+        var tag = $( 'mcStageTag' );
         if ( !S.model )
         {
           name.textContent = '尚未构建模型';
-          meta.textContent = '去「① 数据」填入语料并构建词表,再到「② 架构」初始化模型;或从下方模型库选用一个。';
-          $( 'hubStage' ).textContent = '—'; $( 'hubStep' ).textContent = '0';
+          meta.textContent = '去「数据」页填入语料并构建词表，再到「架构」页初始化模型；或在下方选用一个已保存模型。';
+          setText( 'hubStage', '—' ); setText( 'hubStep', '0' );
+          if ( tag ) { tag.textContent = '未就绪'; tag.className = 'stage-tag'; }
           return;
         }
-        var st = S.stage || 'pretrain';
-        name.textContent = ( S.activeName || '当前模型' );
         var cfg = S.cfg;
-        meta.innerHTML =
-          esc( ( cfg.norm + '/' + cfg.pos + '/' + cfg.attn + '/' + cfg.ffn ).toUpperCase() ) +
-          ' · ' + cfg.dim + 'd / ' + cfg.nLayers + 'L / ' + cfg.nHeads + 'H · 词表 ' + ( S.vocab ? S.vocab.vocabSize : '—' ) +
-          '(' + ( S.tokType === 'bpe' ? 'BPE' : '字符' ) + ') · ' + fmtInt( LLM.countParams( S.model ) ) + ' 参数 · 训练至第 ' + S.step + ' 步';
-        $( 'hubStage' ).textContent = STAGE_NAMES[ st ] || st;
-        $( 'hubStep' ).textContent = String( S.step );
+        name.textContent = S.activeName || '当前训练模型';
+        meta.innerHTML = esc( archLabel( cfg ) ) + ' · ' + cfg.dim + 'd / ' + cfg.nLayers + 'L / ' + cfg.nHeads + 'H · 词表 ' +
+          ( S.vocab ? S.vocab.vocabSize : '—' ) + '（' + ( S.tokType === 'bpe' ? 'BPE' : '字符' ) + '）· ' +
+          fmtInt( LLM.countParams( S.model ) ) + ' 参数 · 步 ' + S.step;
+        setText( 'hubStage', STAGE_NAMES[ st ] || st );
+        setText( 'hubStep', String( S.step ) );
+        if ( tag ) { tag.textContent = STAGE_NAMES[ st ] || st; tag.className = 'stage-tag ' + ( STAGE_CLS[ st ] || '' ); }
+        var ava = $( 'mcNowAva' ); if ( ava ) ava.textContent = 'TL';
       }
 
-      async function refreshHub ()
+      // ---------------------------------------------------------------- 选用训练模型
+      // 全站唯一入口：模型中心「选用」、顶栏切换器、首页最近模型、命令面板都走这里
+      async function adoptRecord ( rec, opts )
       {
-        updateHub();
-        var recs = await T.idbAll();
-        recs.sort( function ( a, b ) { return ( b.ts || 0 ) - ( a.ts || 0 ); } );
-        $( 'hubCount' ).textContent = '共 ' + recs.length + ' 个模型';
-        var grid = $( 'hubGrid' );
-        grid.innerHTML = '';
-        if ( !recs.length )
+        opts = opts || {};
+        if ( !rec ) return false;
+        if ( S.training ) { toast( '训练进行中，请先暂停再切换模型。', 'bad' ); return false; }
+        try
         {
-          grid.innerHTML = '<div class="tiny">模型库为空。训练后到「⑦ 权重」页保存,或在模型中心点「保存快照」。</div>';
-          return;
+          await T.Backend.ensureSynced();
+          var loaded = T.loadModelFromRecord( rec );
+          S.model = loaded.model; S.cfg = loaded.model.cfg; S.vocab = loaded.vocab;
+          S.bpe = loaded.bpe; S.tokType = loaded.tokType; S.stage = rec.stage || 'pretrain';
+          S.activeName = rec.name;
+          var clip = $( 'gradClip' ), wd = $( 'weightDecay' );
+          S.opt = LLM.createOptimizer( T.getLR(), clip ? +clip.value : 1, wd ? +wd.value : 0 );
+          S.step = rec.step || 0; S.lossHist = []; S.evalHist = []; S.gradNorms = {}; S.attnData = null;
+          T.Backend.invalidateGPU();
+          T.Backend.pushState();
+          T.syncArchInputs( S.cfg );
+          if ( $( 'tokType' ) ) $( 'tokType' ).value = loaded.tokType;
+          if ( window.__ttllmV3SetStage ) window.__ttllmV3SetStage( S.stage );
+          updateHub();
+          await T.refreshChatSelect();
+          if ( $( 'msName' ) ) $( 'msName' ).textContent = rec.name;
+          T.addSysNote( '已选用模型「' + rec.name + '」（阶段：' + ( STAGE_NAMES[ S.stage ] || S.stage ) + '）。现在可以继续训练 / 对话 / 去工坊使用它。' );
+          if ( opts.toast ) toast( '已切换到「' + rec.name + '」', 'ok' );
+          if ( opts.goChat ) T.switchTab( 'chat' );
+          return true;
         }
-        recs.forEach( function ( rec )
+        catch ( e )
         {
-          var card = document.createElement( 'div' );
-          card.className = 'mcard';
-          var st = rec.stage || 'pretrain';
-          var arch = ( rec.cfg.norm + '/' + rec.cfg.pos + '/' + rec.cfg.attn + '/' + rec.cfg.ffn ).toUpperCase();
-          card.innerHTML =
-            '<div class="mh"><span class="nm">' + esc( rec.name ) + '</span>' +
-            '<span class="stage-tag ' + ( STAGE_CLS[ st ] || '' ) + '">' + esc( STAGE_NAMES[ st ] || st ) + '</span></div>' +
-            '<div class="mt">' + arch + ' · ' + rec.cfg.dim + 'd/' + rec.cfg.nLayers + 'L · 词表 ' + rec.vocab.vocabSize +
-            ( rec.tokType === 'bpe' ? '(BPE)' : '(字符)' ) + ' · 步 ' + rec.step + '<br>' + esc( rec.createdAt || '' ) + '</div>';
-          var acts = document.createElement( 'div' ); acts.className = 'acts';
-          function btn ( label, cls, fn, title )
-          {
-            var b = document.createElement( 'button' ); b.className = 'btn ' + ( cls || '' );
-            b.textContent = label; if ( title ) b.title = title;
-            b.onclick = fn; acts.appendChild( b ); return b;
-          }
-          btn( '选用', 'primary', async function ()
-          {
-            if ( S.training ) { T.addSysNote( '训练进行中,请先暂停再切换模型。' ); return; }
-            await T.Backend.ensureSynced();
-            var loaded = T.loadModelFromRecord( rec );
-            S.model = loaded.model; S.cfg = loaded.model.cfg; S.vocab = loaded.vocab;
-            S.bpe = loaded.bpe; S.tokType = loaded.tokType; S.stage = st;
-            S.activeName = rec.name;
-            S.opt = LLM.createOptimizer( T.getLR(), +$( 'gradClip' ).value, +$( 'weightDecay' ).value );
-            S.step = rec.step; S.lossHist = []; S.evalHist = []; S.gradNorms = {};
-            T.Backend.invalidateGPU();
-            T.syncArchInputs( S.cfg );
-            $( 'tokType' ).value = loaded.tokType;
-            updateHub(); T.refreshWeightList(); T.refreshChatSelect();
-            T.addSysNote( '已选用模型「' + rec.name + '」(阶段:' + ( STAGE_NAMES[ st ] || st ) + ')。现在可以训练 / 对话 / 去工坊使用它。' );
-          } );
-          btn( '继续训练', '', function ()
-          {
-            S.pendingChatSelect = null;
-            document.querySelector( '#tabs button[data-tab="train"]' ).click();
-          } );
-          btn( '去对话', 'green', function ()
-          {
-            S.pendingChatSelect = rec.id;
-            document.querySelector( '#tabs button[data-tab="chat"]' ).click();
-          } );
-          btn( '去工坊', '', function ()
-          {
-            document.querySelector( '#tabs button[data-tab="studio"]' ).click();
-          } );
-          btn( '导出', '', function () { T.exportRecord( rec ); } );
-          btn( '分享包', '', function () { T.exportSharePackage( rec ); }, '导出单文件 HTML,对方双击即可对话' );
-          btn( '重命名', '', async function ()
-          {
-            var nn = prompt( '新名称:', rec.name );
-            if ( !nn || !nn.trim() ) return;
-            rec.name = nn.trim(); await T.idbPut( rec ); refreshHub(); T.refreshWeightList(); T.refreshChatSelect();
-          } );
-          btn( '删除', 'danger', async function ()
-          {
-            if ( !confirm( '删除模型「' + rec.name + '」?此操作不可恢复。' ) ) return;
-            await T.idbDel( rec.id ); refreshHub(); T.refreshWeightList(); T.refreshChatSelect();
-          } );
-          card.appendChild( acts ); grid.appendChild( card );
-        } );
+          toast( '切换模型失败：' + ( ( e && e.message ) || e ), 'bad' );
+          return false;
+        }
       }
+
+      // ---------------------------------------------------------------- 选用对话模型
+      // 对话页 #chatWeightSelect 是唯一事实源；这里只写它，不另造状态
+      async function selectChatSource ( id, opts )
+      {
+        opts = opts || {};
+        if ( !id ) return false;
+        S.pendingChatSelect = id;
+        try { localStorage.setItem( 'ttllm.chatSrc', id ); } catch ( e ) { }
+        await T.refreshChatSelect();
+        var sel = $( 'chatWeightSelect' );
+        if ( sel ) { try { sel.value = id; } catch ( e ) { } }
+        ModelCenter.syncChat();
+        if ( opts.preload && id.indexOf( 'off:' ) === 0 && window.TLX_MODELS )
+        {
+          toast( '正在把模型装入显存…', 'info' );
+          try { await window.TLX_MODELS.ensure( id.slice( 4 ) ); toast( '模型已就绪，可以直接对话', 'ok' ); }
+          catch ( e ) { toast( '加载失败：' + ( ( e && e.message ) || e ), 'bad' ); }
+        }
+        if ( opts.goChat ) T.switchTab( 'chat' );
+        return true;
+      }
+
+      // ---------------------------------------------------------------- 模型中心 UI
+      var ModelCenter = ( function ()
+      {
+        var rows = [], byId = {}, filter = 'all', sort = 'recent', q = '';
+        var lastLocals = [], lastOffline = [], busy = false, queued = false;
+
+        function rowFromLocal ( rec )
+        {
+          var st = rec.stage || 'pretrain';
+          var cfg = rec.cfg || {};
+          var size = recordBytes( rec );
+          return {
+            kind: 'local', id: rec.id, rec: rec, name: rec.name || '未命名模型',
+            stage: st, stageName: STAGE_NAMES[ st ] || st, stageCls: STAGE_CLS[ st ] || 's-pt',
+            archLabel: archLabel( rec.cfg ),
+            spec: ( cfg.dim || '?' ) + 'd · ' + ( cfg.nLayers || '?' ) + 'L · ' + ( cfg.nHeads || '?' ) + 'H · 词表 ' + ( rec.vocab ? rec.vocab.vocabSize : '?' ),
+            size: size, sizeText: bytesFmt( size ),
+            step: rec.step || 0, ts: rec.ts || 0,
+            date: rec.createdAt || '—',
+            origin: '训练快照 · 步 ' + ( rec.step || 0 ),
+            inUse: false
+          };
+        }
+        function rowFromOffline ( m )
+        {
+          return {
+            kind: 'offline', id: 'off:' + m.key, key: m.key, meta: m, name: m.name || m.key,
+            stage: 'offline', stageName: '开源权重', stageCls: 's-off',
+            archLabel: String( m.arch || '—' ).toUpperCase(),
+            spec: bytesFmt( m.totalBytes ) + ' · ' + ( ( m.files && m.files.length ) || 0 ) + ' 个文件',
+            size: m.totalBytes || 0, sizeText: bytesFmt( m.totalBytes ),
+            step: 0, ts: m.ts || 0,
+            date: m.ts ? new Date( m.ts ).toLocaleString( 'zh-CN' ) : '—',
+            origin: 'OPFS · tlx-models/' + m.key,
+            inUse: false
+          };
+        }
+        function emptyHtml ()
+        {
+          if ( q ) return '<b>没有匹配「' + esc( q ) + '」的模型</b>换个关键词，或清空搜索框。';
+          if ( filter === 'local' ) return '<b>还没有训练快照</b>到「训练台」训几步，再点上方「💾 保存快照」。';
+          if ( filter === 'offline' ) return '<b>还没有下载开源权重</b>切到「发现与下载」，或点右上「⬇ 下载权重」。';
+          return '<b>模型中心还是空的</b>训练后保存快照，或在「发现与下载」里拉一个公开权重。';
+        }
+        function visibleRows ()
+        {
+          var list = rows.filter( function ( r )
+          {
+            if ( filter === 'local' && r.kind !== 'local' ) return false;
+            if ( filter === 'offline' && r.kind !== 'offline' ) return false;
+            if ( q )
+            {
+              var hay = ( r.name + ' ' + r.archLabel + ' ' + r.origin + ' ' + r.stageName ).toLowerCase();
+              if ( hay.indexOf( q ) < 0 ) return false;
+            }
+            return true;
+          } );
+          list.sort( function ( a, b )
+          {
+            if ( sort === 'name' ) return String( a.name ).localeCompare( String( b.name ), 'zh-Hans-CN' );
+            if ( sort === 'size' ) return ( b.size || 0 ) - ( a.size || 0 );
+            return ( b.ts || 0 ) - ( a.ts || 0 );
+          } );
+          return list;
+        }
+        function renderGrid ()
+        {
+          var grid = $( 'hubGrid' ); if ( !grid ) return;
+          var list = visibleRows();
+          setText( 'hubCount', '共 ' + list.length + ' 个' );
+          grid.innerHTML = list.map( function ( r ) { return cardHtml( r ); } ).join( '' );
+          var empty = $( 'mcEmpty' );
+          if ( empty )
+          {
+            if ( list.length ) empty.style.display = 'none';
+            else { empty.style.display = ''; empty.innerHTML = emptyHtml(); }
+          }
+        }
+        function cardHtml ( row, compact )
+        {
+          if ( !row ) return '';
+          var inUse = row.inUse ? '<span class="mc-inuse">● 对话中</span>' : '';
+          if ( compact )
+          {
+            return '<div class="mcard mc-card mini" data-mid="' + esc( row.id ) + '">' +
+              '<div class="mh"><span class="nm">' + esc( row.name ) + '</span>' +
+              '<span class="stage-tag ' + row.stageCls + '">' + esc( row.stageName ) + '</span></div>' +
+              '<div class="mt">' + esc( row.archLabel ) + ' · 步 ' + row.step + '<br>' + esc( row.sizeText ) + ' · ' + esc( row.date ) + '</div>' +
+              '<div class="acts"><button class="btn primary" data-act="' + ( row.kind === 'offline' ? 'chat' : 'use' ) + '">' +
+              ( row.kind === 'offline' ? '💬 使用' : '✔ 选用' ) + '</button>' +
+              ( row.kind === 'local' ? '<button class="btn" data-act="chat">💬 对话</button>' : '' ) + '</div></div>';
+          }
+          var more = row.kind === 'offline'
+            ? '<button data-act="del" class="danger">删除本地权重</button>'
+            : '<button data-act="export">导出 JSON</button><button data-act="share">生成分享包</button>' +
+              '<button data-act="rename">重命名</button><button data-act="del" class="danger">删除</button>';
+          return '<div class="mcard mc-card' + ( row.inUse ? ' cur' : '' ) + '" data-mid="' + esc( row.id ) + '">' +
+            '<div class="mc-ctop">' +
+              '<div class="mc-ava' + ( row.kind === 'offline' ? ' off' : '' ) + '">' + esc( row.kind === 'offline' ? String( row.name ).slice( 0, 1 ).toUpperCase() : 'TL' ) + '</div>' +
+              '<div class="mc-ctitle"><div class="mc-nm" title="' + esc( row.name ) + '">' + esc( row.name ) + '</div>' +
+                '<div class="mc-badges"><span class="stage-tag ' + row.stageCls + '">' + esc( row.stageName ) + '</span>' +
+                '<span class="mc-src' + ( row.kind === 'offline' ? ' off' : '' ) + '">' + ( row.kind === 'offline' ? 'OPFS' : 'IndexedDB' ) + '</span>' + inUse + '</div></div>' +
+            '</div>' +
+            '<div class="mc-meta">' +
+              '<div><span>架构</span><b>' + esc( row.archLabel ) + '</b></div>' +
+              '<div><span>规模</span><b>' + esc( row.spec ) + '</b></div>' +
+              '<div><span>占用</span><b>' + esc( row.sizeText ) + ' · 步 ' + row.step + '</b></div>' +
+              '<div><span>来源</span><b title="' + esc( row.origin ) + '">' + esc( row.origin ) + '</b></div>' +
+              '<div><span>时间</span><b>' + esc( row.date ) + '</b></div>' +
+            '</div>' +
+            '<div class="acts">' +
+              '<button class="btn primary" data-act="' + ( row.kind === 'offline' ? 'chat' : 'use' ) + '">' +
+              ( row.kind === 'offline' ? '💬 使用' : '✔ 选用' ) + '</button>' +
+              ( row.kind === 'local'
+                ? '<button class="btn green" data-act="chat">💬 对话</button>'
+                : '<button class="btn" data-act="load">⏏ 加载到显存</button>' ) +
+              '<details class="mc-more"><summary class="btn ghost">⋯ 更多</summary><div class="mc-menu">' + more + '</div></details>' +
+            '</div>' +
+          '</div>';
+        }
+        function syncChat ()
+        {
+          var src = $( 'chatWeightSelect' ), dst = $( 'mcChatSelect' );
+          if ( !src || !dst ) return;
+          if ( dst.innerHTML !== src.innerHTML ) dst.innerHTML = src.innerHTML;
+          if ( src.value ) { try { dst.value = src.value; } catch ( e ) { } }
+          var chat = src.value || '', changed = false;
+          rows.forEach( function ( r )
+          {
+            var on = ( r.id === chat );
+            if ( r.inUse !== on ) { r.inUse = on; changed = true; }
+          } );
+          if ( changed ) renderGrid();
+        }
+        function tab ( name )
+        {
+          name = name || 'all';
+          var isList = ( name === 'all' || name === 'local' || name === 'offline' );
+          if ( isList ) filter = name;
+          Array.prototype.forEach.call( document.querySelectorAll( '#mcTabs button[data-mc]' ), function ( b )
+          {
+            b.classList.toggle( 'active', b.dataset.mc === name );
+          } );
+          var lp = $( 'mcPaneList' ), dp = $( 'mcPaneDiscover' ), sp = $( 'mcPaneStorage' );
+          if ( lp ) lp.style.display = isList ? '' : 'none';
+          if ( dp ) dp.style.display = name === 'discover' ? '' : 'none';
+          if ( sp ) sp.style.display = name === 'storage' ? '' : 'none';
+          Array.prototype.forEach.call( document.querySelectorAll( '#mcTools .mc-only-list' ), function ( e )
+          {
+            e.style.display = isList ? '' : 'none';
+          } );
+          if ( isList ) renderGrid();
+          if ( name === 'discover' )
+          {
+            var o = $( 'mcOfflineCount' ); if ( o ) o.textContent = lastOffline.length + ' 个已下载';
+            if ( window.__renderMarket ) window.__renderMarket();
+          }
+          if ( name === 'storage' && T.updateStorageInfo ) T.updateStorageInfo( lastLocals, lastOffline );
+        }
+        async function refresh ()
+        {
+          if ( busy ) { queued = true; return; }
+          busy = true;
+          try
+          {
+            var loc = [], off = [], chat = '';
+            try { loc = await T.listLocalModels(); } catch ( e ) { loc = []; }
+            try { off = await T.listOfflineModels(); } catch ( e ) { off = []; }
+            try { chat = ( $( 'chatWeightSelect' ) || {} ).value || ''; } catch ( e ) { }
+            lastLocals = loc; lastOffline = off;
+            rows = loc.map( rowFromLocal ).concat( off.map( rowFromOffline ) );
+            byId = {};
+            rows.forEach( function ( r ) { r.inUse = ( r.id === chat ); byId[ r.id ] = r; } );
+            setText( 'mcKpiLocal', String( loc.length ) );
+            setText( 'mcKpiOffline', String( off.length ) );
+            var total = 0; rows.forEach( function ( r ) { total += r.size || 0; } );
+            setText( 'mcKpiSize', bytesFmt( total ) );
+            setText( 'mcOfflineCount', off.length + ' 个已下载' );
+            updateHub();
+            syncChat();
+            renderGrid();
+            if ( T.updateStorageInfo ) T.updateStorageInfo( loc, off );
+          }
+          finally
+          {
+            busy = false;
+            if ( queued ) { queued = false; setTimeout( refresh, 0 ); }
+          }
+        }
+        async function removeRow ( row )
+        {
+          if ( !confirm( '删除「' + row.name + '」？此操作不可恢复。' ) ) return;
+          if ( row.kind === 'offline' )
+          {
+            if ( window.TLX_MODELS ) await window.TLX_MODELS.remove( row.key );
+          }
+          else await T.idbDel( row.id );
+          if ( S.chatCache ) delete S.chatCache[ row.id ];
+          if ( ( $( 'chatWeightSelect' ) || {} ).value === row.id ) S.pendingChatSelect = '__current__';
+          T.addSysNote( '已删除模型「' + row.name + '」。' );
+          await T.refreshChatSelect();
+          await refresh();
+        }
+        async function renameRow ( row )
+        {
+          var nn = prompt( '新名称：', row.name );
+          if ( !nn || !nn.trim() ) return;
+          var rec = row.rec;
+          rec.name = nn.trim();
+          await T.idbPut( rec );
+          if ( S.activeName === row.name ) S.activeName = rec.name;
+          await T.refreshChatSelect();
+          await refresh();
+        }
+        async function onGridClick ( e )
+        {
+          var btn = e.target.closest ? e.target.closest( 'button[data-act]' ) : null;
+          if ( !btn ) return;
+          var card = btn.closest( '.mc-card' );
+          var row = card ? byId[ card.dataset.mid ] : null;
+          if ( !row ) return;
+          var act = btn.dataset.act;
+          var det = card.querySelector( 'details' ); if ( det ) det.open = false;
+          if ( act === 'use' )
+          {
+            if ( row.kind === 'offline' ) await selectChatSource( row.id, { preload: true, goChat: true } );
+            else await adoptRecord( row.rec, { toast: true } );
+          }
+          else if ( act === 'chat' ) await selectChatSource( row.id, { preload: row.kind === 'offline', goChat: true } );
+          else if ( act === 'load' )
+          {
+            if ( !window.TLX_MODELS ) { toast( '模型模块未就绪', 'bad' ); return; }
+            toast( '正在加载到显存…', 'info' );
+            try { await window.TLX_MODELS.ensure( row.key ); toast( '已加载到显存', 'ok' ); }
+            catch ( e2 ) { toast( '加载失败：' + ( ( e2 && e2.message ) || e2 ), 'bad' ); }
+          }
+          else if ( act === 'export' && row.rec ) T.exportRecord( row.rec );
+          else if ( act === 'share' && row.rec ) T.exportSharePackage( row.rec );
+          else if ( act === 'rename' && row.rec ) await renameRow( row );
+          else if ( act === 'del' ) await removeRow( row );
+          else return;
+          if ( act !== 'export' && act !== 'share' && act !== 'load' ) await refresh();
+        }
+        function bind ()
+        {
+          var grid = $( 'hubGrid' );
+          if ( grid && !grid.dataset.mcBound )
+          {
+            grid.dataset.mcBound = '1';
+            grid.addEventListener( 'click', onGridClick );
+          }
+          var tabs = $( 'mcTabs' );
+          if ( tabs && !tabs.dataset.mcBound )
+          {
+            tabs.dataset.mcBound = '1';
+            tabs.addEventListener( 'click', function ( e )
+            {
+              var b = e.target.closest ? e.target.closest( 'button[data-mc]' ) : null;
+              if ( b ) tab( b.dataset.mc );
+            } );
+          }
+          var search = $( 'mcSearch' );
+          if ( search ) search.addEventListener( 'input', function () { q = this.value.toLowerCase().trim(); renderGrid(); } );
+          var sortSel = $( 'mcSort' );
+          if ( sortSel ) sortSel.addEventListener( 'change', function () { sort = this.value; renderGrid(); } );
+        }
+        return {
+          refresh: refresh, tab: tab, bind: bind, syncChat: syncChat,
+          cardHtml: cardHtml, rowFromLocal: rowFromLocal,
+          get: function ( id ) { return byId[ id ]; },
+          rows: function () { return rows.slice(); },
+          recent: function ( n ) { return rows.slice().sort( function ( a, b ) { return ( b.ts || 0 ) - ( a.ts || 0 ); } ).slice( 0, n || 4 ); },
+          state: function () { return { filter: filter, sort: sort, q: q, local: lastLocals.length, offline: lastOffline.length }; }
+        };
+      } )();
+
+      // ---------------------------------------------------------------- 保存快照 / 绑定
+      async function saveSnapshot ()
+      {
+        if ( !S.model ) { toast( '尚未构建模型，无法保存快照。', 'bad' ); return; }
+        await T.Backend.ensureSynced();
+        var name = ( prompt( '模型快照名称：', S.activeName || ( '模型@' + S.step + '步' ) ) || '' ).trim();
+        if ( !name ) return;
+        var rec = T.modelToRecord( name );
+        await T.idbPut( rec );
+        S.activeName = name;
+        T.addSysNote( '已保存模型快照「' + name + '」到模型中心。' );
+        toast( '已保存快照「' + name + '」', 'ok' );
+        await ModelCenter.refresh();
+      }
+      function warmOn () { try { return localStorage.getItem( 'ttllm.autoWarm' ) !== '0'; } catch ( e ) { return true; } }
+      function syncWarmBtn () { setText( 'mcWarmToggle', '启动时自动加载上次模型：' + ( warmOn() ? '开' : '关' ) ); }
 
       function bindHub ()
       {
-        $( 'hubGoTrain' ).onclick = function () { document.querySelector( '#tabs button[data-tab="train"]' ).click(); };
-        $( 'hubGoChat' ).onclick = function () { document.querySelector( '#tabs button[data-tab="chat"]' ).click(); };
-        $( 'hubGoStudio' ).onclick = function () { document.querySelector( '#tabs button[data-tab="studio"]' ).click(); };
-        $( 'hubSaveAs' ).onclick = async function ()
+        ModelCenter.bind();
+        var on = function ( id, ev, fn ) { var e = $( id ); if ( e ) e[ ev ] = fn; };
+        on( 'hubGoTrain', 'onclick', function () { T.switchTab( 'train' ); } );
+        on( 'hubGoChat', 'onclick', function () { T.switchTab( 'chat' ); } );
+        on( 'hubGoStudio', 'onclick', function () { T.switchTab( 'studio' ); } );
+        on( 'hubSaveAs', 'onclick', function () { void saveSnapshot(); } );
+        on( 'hubRefreshBtn', 'onclick', function () { void ModelCenter.refresh(); } );
+        on( 'mcDownloadBtn', 'onclick', function ()
         {
-          if ( !S.model ) { alert( '尚未构建模型。' ); return; }
-          await T.Backend.ensureSynced();
-          var name = ( prompt( '模型快照名称:', S.activeName || ( '模型@' + S.step + '步' ) ) || '' ).trim();
-          if ( !name ) return;
-          var rec = T.modelToRecord( name );
-          await T.idbPut( rec );
-          S.activeName = name;
-          T.addSysNote( '已保存模型快照「' + name + '」到模型库。' );
-          refreshHub(); T.refreshWeightList(); T.refreshChatSelect();
-        };
-        $( 'hubRefreshBtn' ).onclick = refreshHub;
-        $( 'hubImportBtn' ).onclick = function () { $( 'hubImportFile' ).click(); };
-        $( 'hubImportFile' ).addEventListener( 'change', async function ()
+          if ( window.TLX_MODELS ) window.TLX_MODELS.open();
+          else toast( '模型模块未就绪', 'bad' );
+        } );
+        on( 'hubImportBtn', 'onclick', function () { var f = $( 'hubImportFile' ); if ( f ) f.click(); } );
+        var imp = $( 'hubImportFile' );
+        if ( imp ) imp.addEventListener( 'change', async function ()
         {
           var f = this.files && this.files[ 0 ];
           this.value = '';
           if ( !f ) return;
+          await T.importRecordFile( f );
+          await ModelCenter.refresh();
+        } );
+        on( 'mcRepoGo', 'onclick', function ()
+        {
+          var v = ( $( 'mcRepoInput' ).value || '' ).trim();
+          if ( !v ) { toast( '请输入仓库 ID 或链接', 'bad' ); return; }
+          if ( window.TLX_MODELS ) window.TLX_MODELS.openWith( v );
+          else toast( '模型模块未就绪', 'bad' );
+        } );
+        var ri = $( 'mcRepoInput' );
+        if ( ri ) ri.addEventListener( 'keydown', function ( e ) { if ( e.key === 'Enter' ) { var b = $( 'mcRepoGo' ); if ( b ) b.click(); } } );
+        var sel = $( 'mcChatSelect' );
+        if ( sel ) sel.onchange = function ()
+        {
+          var v = this.value;
+          void selectChatSource( v, { preload: v.indexOf( 'off:' ) === 0 } );
+        };
+        on( 'mcPersistBtn', 'onclick', async function ()
+        {
+          if ( !( navigator.storage && navigator.storage.persist ) ) { toast( '当前浏览器不支持持久存储', 'bad' ); return; }
           try
           {
-            var obj = JSON.parse( await f.text() );
-            if ( !obj || !obj.params || !obj.cfg || !obj.vocab ) throw new Error( '不是有效的模型 JSON(缺少 params/cfg/vocab)' );
-            var params = {};
-            for ( var k in obj.params ) params[ k ] = Float64Array.from( obj.params[ k ] );
-            var rec = {
-              id: 'w' + Date.now() + '_' + Math.floor( Math.random() * 1e6 ),
-              name: obj.name || f.name.replace( /\.json$/i, '' ),
-              cfg: obj.cfg, vocab: obj.vocab, step: obj.step || 0,
-              bpe: obj.bpe || null, tokType: obj.tokType || ( obj.bpe ? 'bpe' : 'char' ),
-              createdAt: new Date().toLocaleString( 'zh-CN' ), ts: Date.now(),
-              stage: obj.stage || 'pretrain', params: params
-            };
-            await T.idbPut( rec );
-            T.addSysNote( '已导入模型「' + rec.name + '」到模型库。' );
-            refreshHub(); T.refreshWeightList(); T.refreshChatSelect();
-          } catch ( e ) { alert( '导入失败:' + e.message ); }
+            var ok = await navigator.storage.persist();
+            toast( ok ? '已获得持久存储' : '浏览器未授予持久存储（仍可正常使用）', ok ? 'ok' : 'info' );
+          }
+          catch ( e ) { toast( '申请失败：' + ( ( e && e.message ) || e ), 'bad' ); }
         } );
-        // 切到模型中心时刷新
-        document.querySelector( '#tabs button[data-tab="hub"]' ).addEventListener( 'click', function () { refreshHub(); } );
+        on( 'mcWarmToggle', 'onclick', function ()
+        {
+          try { localStorage.setItem( 'ttllm.autoWarm', warmOn() ? '0' : '1' ); } catch ( e ) { }
+          syncWarmBtn();
+          toast( warmOn() ? '下次启动会自动加载上次使用的开源模型' : '已关闭启动自动加载', 'info' );
+        } );
+        syncWarmBtn();
+        void ModelCenter.refresh();
       }
+
+      // 暴露给应用层 / 顶栏 / 首页 / 命令面板
+      T.adoptRecord = adoptRecord;
+      T.selectChatSource = selectChatSource;
+      T.ModelCenter = ModelCenter;
 
       // ============================================================================
       //  二、训练阶段:子标签 + SFT
@@ -24316,9 +26020,7 @@ export interface Backend {
         home: [ '首页', '从一个想法开始:对话、造模型、加载公开权重' ],
         chat: [ '对话', '与当前模型 / 快照 / 官方权重对话 · 流式输出、可停止、可导出' ],
         wizard: [ '造一个模型', '四步向导:目标 → 数据 → 训练 → 发布' ],
-        hub: [ '模型库', '本地模型库:选用 / 继续训练 / 导出 / 分享' ],
-        market: [ '模型市场', '公开权重一键加载 · Qwen / Llama / DeepSeek …' ],
-        weights: [ '保存与分享', '保存快照 / JSON / 单文件分享包' ],
+        hub: [ '模型中心', '训练快照 / 开源权重 / 下载 / 存储分享 —— 一处管理' ],
         studio: [ 'AI 工坊', '文生图 · 文生视频 · Agent · 工作流' ],
         viz: [ '实验台', '训练曲线 / 运行对比 / 可视化 / 基准' ],
         data: [ '数据 · 专家', '语料导入、词表构建与编码' ],
@@ -24328,9 +26030,19 @@ export interface Backend {
       };
       function goTab ( name )
       {
+        // 旧入口兼容：市场 / 保存与分享已并入模型中心的子标签
+        var sub = '';
+        if ( name === 'market' ) { name = 'hub'; sub = 'discover'; }
+        else if ( name === 'weights' ) { name = 'hub'; sub = 'storage'; }
         var b = document.querySelector( '#tabs button[data-tab="' + name + '"]' );
         if ( b ) b.click();
+        if ( sub ) setTimeout( function ()
+        {
+          var T = window.__ttllm;
+          if ( T && T.ModelCenter ) T.ModelCenter.tab( sub );
+        }, 0 );
       }
+      window.__goTab = goTab;
 
       /* ------------------------------------------------------------------ 侧栏 / 顶栏 */
       var app = $( 'app' );
@@ -24352,8 +26064,12 @@ export interface Backend {
         var meta = VIEW_META[ b.dataset.tab ];
         if ( meta ) { $( 'viewTitle' ).textContent = meta[ 0 ]; $( 'viewSub' ).textContent = meta[ 1 ]; }
         closeSidebar();
-        if ( b.dataset.tab === 'market' ) renderMarket();
-        if ( b.dataset.tab === 'hub' || b.dataset.tab === 'weights' || b.dataset.tab === 'chat' ) buildSwitcher();
+        if ( b.dataset.tab === 'hub' )
+        {
+          var T = window.__ttllm;
+          if ( T && T.ModelCenter ) T.ModelCenter.onShow();
+        }
+        if ( b.dataset.tab === 'chat' ) buildSwitcher();
         if ( b.dataset.tab === 'home' ) { renderHomeRecent(); homeTick(); }
       } );
 
@@ -24699,38 +26415,32 @@ export interface Backend {
       {
         var box = $( 'homeRecent' ); if ( !box ) return;
         var T = window.__ttllm;
-        if ( !T || !T.idbAll ) { box.innerHTML = ''; return; }
-        T.idbAll().then( function ( recs )
+        if ( !T || !T.ModelCenter ) { box.innerHTML = ''; return; }
+        T.ModelCenter.refresh().then( function ()
         {
-          recs = recs || [];
-          recs.sort( function ( a, b ) { return ( b.ts || 0 ) - ( a.ts || 0 ); } );
-          if ( !recs.length )
+          var rows = T.ModelCenter.recent( 4 );
+          if ( !rows.length )
           {
-            box.innerHTML = '<div class="tiny">模型库还是空的。点上面的「造一个模型」,或先「⚡ 一键试跑」感受一下。</div>';
+            box.innerHTML = '<div class="tiny">模型库还是空的。点上面的「造一个模型」，或先「⚡ 一键试跑」感受一下。</div>';
             return;
           }
-          box.innerHTML = recs.slice( 0, 4 ).map( function ( rec )
-          {
-            return '<div class="mcard" data-rec="' + rec.id + '">' +
-              '<div class="mh"><span class="nm">' + rec.name + '</span>' +
-              '<span class="stage-tag ' + ( rec.stage === 'sft' ? 's-sft' : rec.stage === 'rl' ? 's-rl' : rec.stage === 'p2p' ? 's-p2p' : 's-pt' ) + '">' +
-              ( rec.stage === 'sft' ? '后训练' : rec.stage === 'rl' ? '强化学习' : rec.stage === 'p2p' ? 'P2P' : '预训练' ) + '</span></div>' +
-              '<div class="mt">步 ' + rec.step + ' · 词表 ' + ( rec.vocab ? rec.vocab.vocabSize : '?' ) + ' · ' + ( rec.createdAt || '' ) + '</div>' +
-              '<div class="acts"><button class="btn primary use-btn">选用</button>' +
-              '<button class="btn chat-btn">去对话</button></div></div>';
-          } ).join( '' );
+          box.innerHTML = rows.map( function ( r ) { return T.ModelCenter.cardHtml( r, true ); } ).join( '' );
         } ).catch( function () { /* ignore */ } );
       }
       if ( $( 'homeRecent' ) ) $( 'homeRecent' ).addEventListener( 'click', function ( e )
       {
-        var b = e.target.closest ? e.target.closest( 'button' ) : null;
+        var b = e.target.closest ? e.target.closest( 'button[data-act]' ) : null;
         if ( !b ) return;
-        var card = b.closest( '.mcard' ); if ( !card ) return;
-        var id = card.dataset.rec;
-        window.__ttllm.idbAll().then( function ( recs )
+        var card = b.closest( '.mc-card' ); if ( !card ) return;
+        var T = window.__ttllm;
+        var row = T && T.ModelCenter ? T.ModelCenter.get( card.dataset.mid ) : null;
+        if ( !row ) return;
+        if ( b.dataset.act === 'use' )
         {
-          ( recs || [] ).forEach( function ( r ) { if ( r.id === id ) { if ( b.classList.contains( 'use-btn' ) ) adoptModel( r ); else { adoptModel( r ); goTab( 'chat' ); } } } );
-        } );
+          if ( row.kind === 'offline' ) void T.selectChatSource( row.id, { preload: true, goChat: true } );
+          else void T.adoptRecord( row.rec, { toast: true, goChat: true } );
+        }
+        else if ( b.dataset.act === 'chat' ) void T.selectChatSource( row.id, { preload: row.kind === 'offline', goChat: true } );
       } );
       if ( $( 'hrMore' ) ) $( 'hrMore' ).addEventListener( 'click', function () { goTab( 'hub' ); } );
       if ( $( 'hcContinue' ) ) $( 'hcContinue' ).addEventListener( 'click', function () { goTab( 'train' ); } );
@@ -24831,7 +26541,7 @@ export interface Backend {
 
       /* ------------------------------------------------------------------ 模型市场 */
       var mktFilter = 'all';
-      function renderMarket ()
+      async function renderMarket ()
       {
         var grid = $( 'mktGrid' ); if ( !grid ) return;
         var q = ( ( $( 'mktSearch' ) && $( 'mktSearch' ).value ) || '' ).toLowerCase().trim();
@@ -24842,10 +26552,18 @@ export interface Backend {
           if ( !q ) return true;
           return ( c.name + ' ' + c.vendor + ' ' + c.arch + ' ' + c.desc ).toLowerCase().indexOf( q ) >= 0;
         } );
+        var downloaded = {};
+        try
+        {
+          var off = window.TLX_MODELS ? await window.TLX_MODELS.list() : [];
+          ( off || [] ).forEach( function ( m ) { downloaded[ m.arch ] = true; } );
+        } catch ( e ) { }
         $( 'mktCount' ).textContent = '共 ' + items.length + ' 个模型';
         grid.innerHTML = items.map( function ( c )
         {
           var avail = known[ c.arch ];
+          var isDown = !!downloaded[ c.arch ];
+          var url = ( c.sources && c.sources[ 0 ] ) ? c.sources[ 0 ].url : ( c.dir || '' );
           var srcs = ( c.sources || [] ).map( function ( s )
           {
             return '<button class="btn ghost mkt-src" data-url="' + s.url + '" title="' + s.url + '">' + s.label + '</button>';
@@ -24854,7 +26572,7 @@ export interface Backend {
             '<div class="mkt-head">' +
             '<div class="mkt-ava" style="background:' + c.grad + '">' + c.ava + '</div>' +
             '<div class="mh2"><b>' + c.name + '</b><span>' + c.vendor + ' · ' + c.arch + '</span></div>' +
-            ( avail ? '<span class="tag cur">已支持</span>' : '<span class="tag">适配中</span>' ) +
+            ( isDown ? '<span class="tag cur">已下载</span>' : ( avail ? '<span class="tag cur">已支持</span>' : '<span class="tag">适配中</span>' ) ) +
             '</div>' +
             '<div class="mkt-desc">' + c.desc + '</div>' +
             '<div class="mkt-meta">' +
@@ -24865,14 +26583,16 @@ export interface Backend {
             '</div>' +
             ( srcs ? '<div class="mkt-srcs">' + srcs + '</div>' : '' ) +
             ( c.note ? '<div class="mkt-note">⚠ ' + c.note + '</div>' : '' ) +
+            ( isDown ? '<div class="mkt-note" style="color:var(--accent2)">✓ 已下载到本地，可在模型中心离线使用</div>' : '' ) +
             '<div class="mkt-acts">' +
-            ( avail && ( ( c.sources && c.sources.length ) || c.dir ) ? '<button class="btn primary mkt-use">▶ 加载到推理台</button>' : '' ) +
-            ( avail && ( ( c.sources && c.sources.length ) || c.dir ) ? '<button class="btn mkt-fill">填入上方</button>' : '' ) +
-            '<button class="btn ghost mkt-copy" data-copy="' + ( ( c.sources && c.sources[ 0 ] ) ? c.sources[ 0 ].url : c.dir ) + '">复制地址</button>' +
+            ( url && avail ? '<button class="btn primary mkt-get" data-url="' + url + '">' + ( isDown ? '重新下载' : '⬇ 下载到本地' ) + '</button>' : '' ) +
+            ( avail && url ? '<button class="btn mkt-use">▶ 加载到显存</button>' : '' ) +
+            '<button class="btn ghost mkt-copy" data-copy="' + url + '">复制地址</button>' +
             '</div>' +
             '</div>';
         } ).join( '' ) || '<div class="tiny">没有匹配的模型。</div>';
       }
+      window.__renderMarket = renderMarket;
       function catalogById ( id )
       {
         for ( var i = 0; i < CATALOG.length; i++ ) if ( CATALOG[ i ].id === id ) return CATALOG[ i ];
@@ -24889,7 +26609,12 @@ export interface Backend {
         {
           $( 'mktDir' ).value = t.dataset.url;
           $( 'mktArch' ).value = c.arch;
-          toast( '已填入 ' + t.textContent + ' 地址,点「加载到推理台」开始下载' );
+          toast( '已填入 ' + t.textContent + ' 地址；点「加载到显存」或「下载到本地」' );
+        } else if ( t.classList.contains( 'mkt-get' ) && c )
+        {
+          var repo = t.dataset.url || ( ( c.sources && c.sources[ 0 ] ) ? c.sources[ 0 ].url : c.dir );
+          if ( repo && window.TLX_MODELS ) window.TLX_MODELS.openWith( repo );
+          else toast( '下载模块未就绪', 'bad' );
         } else if ( t.classList.contains( 'mkt-fill' ) && c )
         {
           $( 'mktArch' ).value = c.arch;
@@ -24965,7 +26690,7 @@ export interface Backend {
         loadOfficial( $( 'mktArch' ).value, ( $( 'mktDir' ).value || '' ).trim() );
       } );
       var mktToInfer = $( 'mktToInfer' );
-      if ( mktToInfer ) mktToInfer.addEventListener( 'click', function () { goTab( 'chat' ); } );
+      if ( mktToInfer ) mktToInfer.addEventListener( 'click', function () { goTab( 'infer' ); } );
 
       /* ------------------------------------------------------------------ 模型切换器 */
       var lastRecs = [];
@@ -24976,43 +26701,61 @@ export interface Backend {
           '<div class="mt2"><b>' + title + '</b><span>' + sub + '</span></div>' +
           ( tag ? '<span class="tagm">' + tag + '</span>' : '' ) + '</div>';
       }
+      function fmtModelBytes ( n )
+      {
+        if ( !n && n !== 0 ) return '—';
+        var u = [ 'B', 'KB', 'MB', 'GB' ], i = 0;
+        while ( n >= 1024 && i < u.length - 1 ) { n /= 1024; i++; }
+        return ( i === 0 ? Math.round( n ) : n.toFixed( 1 ) ) + ' ' + u[ i ];
+      }
+      function stageLabel ( st )
+      {
+        return st === 'sft' ? '后训练 SFT' : st === 'rl' ? '强化学习' : st === 'p2p' ? 'P2P 联邦' : '预训练';
+      }
+
+      /* 顶部模型切换器：训练模型 / 已下载开源权重 / 快照，全部来自统一模型仓库 */
       async function buildSwitcher ()
       {
         var menu = $( 'msMenu' ); if ( !menu ) return;
         var T = window.__ttllm, S = T && T.S;
+        if ( !T ) return;
         var html = '';
         if ( S && S.model )
         {
-          html += '<div class="ms-group">当前 · 本机训练模型</div>';
-          html += msItemHtml( 'goto:chat', '✨', ( S.activeName || '当前模型' ),
-            '步 ' + ( S.step || 0 ) + ' · 词表 ' + ( S.vocab ? S.vocab.vocabSize : '?' ) +
-            ' · ' + ( S.stage === 'sft' ? '后训练 SFT' : S.stage === 'rl' ? '强化学习' : S.stage === 'p2p' ? 'P2P 联邦' : '预训练' ), '使用中' );
+          html += '<div class="ms-group">当前训练模型</div>';
+          html += msItemHtml( 'goto:hub', '✨', S.activeName || '当前模型',
+            '步 ' + ( S.step || 0 ) + ' · 词表 ' + ( S.vocab ? S.vocab.vocabSize : '?' ) + ' · ' + stageLabel( S.stage ), '训练中' );
         }
-        try
+        var sel = $( 'chatWeightSelect' );
+        var curTxt = sel && sel.selectedOptions && sel.selectedOptions[ 0 ] ? sel.selectedOptions[ 0 ].textContent : '';
+        if ( curTxt )
         {
-          if ( T && T.idbAll )
+          html += '<div class="ms-group">对话正在使用</div>';
+          html += msItemHtml( 'goto:hub', '💬', curTxt, '点开模型中心切换', '' );
+        }
+        var off = [], recs = [];
+        try { off = await T.listOfflineModels(); } catch ( e ) { off = []; }
+        try { recs = await T.listLocalModels(); lastRecs = recs; } catch ( e ) { recs = []; }
+        if ( off.length )
+        {
+          html += '<div class="ms-group">已下载开源权重 · ' + off.length + '</div>';
+          off.slice( 0, 6 ).forEach( function ( m )
           {
-            lastRecs = ( await T.idbAll() ) || [];
-            lastRecs.sort( function ( a, b ) { return ( b.ts || 0 ) - ( a.ts || 0 ); } );
-            if ( lastRecs.length )
-            {
-              html += '<div class="ms-group">模型库(本地 IndexedDB)</div>';
-              lastRecs.slice( 0, 8 ).forEach( function ( rec )
-              {
-                html += msItemHtml( 'local:' + rec.id, '📦', rec.name,
-                  ( rec.stage || 'pretrain' ) + ' · 步 ' + rec.step + ' · 词表 ' + ( rec.vocab ? rec.vocab.vocabSize : '?' ), '' );
-              } );
-            }
-          }
-        } catch ( e ) { /* IndexedDB 不可用时忽略 */ }
-        html += '<div class="ms-group">公开权重(推理台加载)</div>';
-        CATALOG.filter( function ( c ) { return c.sources && c.sources.length; } ).slice( 0, 6 ).forEach( function ( c )
+            html += msItemHtml( 'off:' + m.key, '🌐', m.name, ( m.arch || '' ) + ' · ' + fmtModelBytes( m.totalBytes ), '' );
+          } );
+        }
+        if ( recs.length )
         {
-          html += msItemHtml( 'cat:' + c.id, c.ava, c.name, c.vendor + ' · ' + c.params, 'safetensors' );
-        } );
+          html += '<div class="ms-group">训练快照 · ' + recs.length + '</div>';
+          recs.slice( 0, 6 ).forEach( function ( r )
+          {
+            html += msItemHtml( 'local:' + r.id, '📦', r.name,
+              stageLabel( r.stage ) + ' · 步 ' + r.step + ' · 词表 ' + ( r.vocab ? r.vocab.vocabSize : '?' ), '' );
+          } );
+        }
         html += '<div class="ms-sep"></div>';
-        html += msItemHtml( 'goto:market', '🌐', '浏览模型市场…', '公开权重 / 自定义目录加载', '' );
-        html += msItemHtml( 'goto:hub', '📦', '管理模型库', '选用 / 保存 / 导出 / 分享', '' );
+        html += msItemHtml( 'goto:discover', '⬇', '发现与下载…', '从 HuggingFace / 魔搭拉取开源权重', '' );
+        html += msItemHtml( 'goto:hub', '⚙', '打开模型中心…', '选用 / 快照 / 导出 / 分享', '' );
         menu.innerHTML = html;
       }
       var msBtn = $( 'msBtn' ), msMenu = $( 'msMenu' );
@@ -25020,7 +26763,7 @@ export interface Backend {
       {
         e.stopPropagation();
         if ( msMenu.classList.contains( 'open' ) ) { msMenu.classList.remove( 'open' ); return; }
-        buildSwitcher();
+        void buildSwitcher();
         msMenu.classList.add( 'open' );
       } );
       document.addEventListener( 'click', function ( e )
@@ -25033,49 +26776,33 @@ export interface Backend {
         if ( !it ) return;
         var key = it.dataset.mi || '';
         msMenu.classList.remove( 'open' );
-        if ( key.indexOf( 'goto:' ) === 0 ) { goTab( key.slice( 5 ) ); return; }
-        if ( key.indexOf( 'cat:' ) === 0 )
+        var T = window.__ttllm;
+        if ( key === 'goto:discover' )
         {
-          var c = catalogById( key.slice( 4 ) );
-          if ( c ) loadOfficial( c.arch, ( c.sources && c.sources[ 0 ] ) ? c.sources[ 0 ].url : c.dir );
+          goTab( 'hub' );
+          setTimeout( function () { if ( T && T.ModelCenter ) T.ModelCenter.tab( 'discover' ); }, 0 );
+          return;
+        }
+        if ( key.indexOf( 'goto:' ) === 0 ) { goTab( key.slice( 5 ) ); return; }
+        if ( key.indexOf( 'off:' ) === 0 )
+        {
+          if ( T && T.selectChatSource ) void T.selectChatSource( key, { preload: true, goChat: true } );
           return;
         }
         if ( key.indexOf( 'local:' ) === 0 )
         {
           var id = key.slice( 6 ), rec = null;
           lastRecs.forEach( function ( r ) { if ( r.id === id ) rec = r; } );
-          if ( rec ) adoptModel( rec );
+          if ( rec ) void adoptModel( rec );
         }
       } );
 
-      /* 选用本机模型(与模型库「选用」同一条路径) */
+      /* 选用本机模型（统一走 adoptRecord：模型中心 / 首页 / 命令面板共用同一条路径） */
       async function adoptModel ( rec )
       {
-        var T = window.__ttllm; if ( !T || !T.S ) return;
-        var S = T.S;
-        if ( S.training ) { toast( '训练进行中,请先暂停再切换模型。', 'bad' ); return; }
-        try
-        {
-          await T.Backend.ensureSynced();
-          var loaded = T.loadModelFromRecord( rec );
-          S.model = loaded.model; S.cfg = loaded.model.cfg; S.vocab = loaded.vocab;
-          S.bpe = loaded.bpe; S.tokType = loaded.tokType; S.stage = rec.stage || 'pretrain';
-          S.activeName = rec.name;
-          S.opt = window.LLM.createOptimizer( T.getLR(), +$( 'gradClip' ).value, +$( 'weightDecay' ).value );
-          S.step = rec.step; S.lossHist = []; S.evalHist = []; S.gradNorms = {};
-          T.Backend.invalidateGPU();
-          T.syncArchInputs( S.cfg );
-          $( 'tokType' ).value = loaded.tokType;
-          if ( window.__ttllmV3SetStage ) window.__ttllmV3SetStage( S.stage );
-          T.refreshWeightList(); T.refreshChatSelect();
-          T.addSysNote( '已选用模型「' + rec.name + '」,现在可以对话 / 继续训练 / 去工坊使用它。' );
-          $( 'msName' ).textContent = rec.name;
-          toast( '已切换到「' + rec.name + '」', 'ok' );
-          goTab( 'chat' );
-        } catch ( e )
-        {
-          toast( '切换模型失败:' + ( e && e.message ? e.message : e ), 'bad' );
-        }
+        var T = window.__ttllm; if ( !T ) return;
+        var ok = await T.adoptRecord( rec, { toast: true, goChat: true } );
+        if ( ok ) { var n = $( 'msName' ); if ( n ) n.textContent = rec.name; }
       }
 
       /* 顶栏模型名轮询(轻量) */
@@ -25311,6 +27038,1228 @@ export interface Backend {
       homeTick();
       wizShow( 1 );
       setInterval( function () { wizTick(); homeTick(); }, 700 );
+    } )();
+  </script>
+
+  <script id="tlxModels">
+    /* ==================================================================================
+       TLX_MODELS · 浏览器内下载 / 存储 / 加载开源权重
+       - 只依赖 HuggingFace 的 resolve 接口（hf-mirror 同样可用），逐文件流式写入 OPFS
+       - 装一个 fetch 垫片：tlxopfs://<key>/<file> 直接从 OPFS 返回（支持 Range / 206），
+         因此引擎的 safetensors 加载器完全不用改，且断网可用
+       - 对外：list / download / ensure / remove / open
+       ================================================================================== */
+    ( function ()
+    {
+      'use strict';
+      var $ = function ( id ) { return document.getElementById( id ); };
+      var ROOT = 'tlx-models';
+      var cache = {};
+      var lastPlan = null;
+
+      function api () { return window.__ENGINE__ && window.__ENGINE__.api; }
+      function bytes ( n )
+      {
+        if ( !n && n !== 0 ) return '—';
+        var u = [ 'B', 'KB', 'MB', 'GB', 'TB' ], i = 0;
+        while ( n >= 1024 && i < u.length - 1 ) { n /= 1024; i++; }
+        return ( i === 0 ? n : n.toFixed( 1 ) ) + ' ' + u[ i ];
+      }
+
+      /* ---------------------------------------------------------------- OPFS */
+      function opfsRoot ()
+      {
+        if ( !navigator.storage || !navigator.storage.getDirectory )
+          return Promise.reject( new Error( '当前浏览器不支持 OPFS（需要 Chrome / Edge 108+）' ) );
+        return navigator.storage.getDirectory();
+      }
+      function modelsDir ( create )
+      {
+        return opfsRoot().then( function ( r ) { return r.getDirectoryHandle( ROOT, { create: !!create } ); } );
+      }
+      function modelDir ( key, create )
+      {
+        return modelsDir( create ).then( function ( d ) { return d.getDirectoryHandle( key, { create: !!create } ); } );
+      }
+
+      /* ---------------------------------------------------------------- fetch 垫片 */
+      var _fetch = window.fetch ? window.fetch.bind( window ) : null;
+      async function opfsRespond ( url, init )
+      {
+        var rest = url.slice( 'tlxopfs://'.length );
+        var i = rest.indexOf( '/' );
+        var key = i < 0 ? rest : rest.slice( 0, i );
+        var name = i < 0 ? 'config.json' : rest.slice( i + 1 );
+        var dir = await modelDir( key, false );
+        var fh = await dir.getFileHandle( name );
+        var file = await fh.getFile();
+        var h = ( init && init.headers ) || {};
+        var range = h.Range || h.range || null;
+        var type = /\.json$/.test( name ) ? 'application/json' : 'application/octet-stream';
+        if ( !range )
+          return new Response( file, { status: 200, headers: { 'Content-Type': type, 'Accept-Ranges': 'bytes', 'Content-Length': String( file.size ) } } );
+        var m = /bytes=(\d+)-(\d*)/.exec( range );
+        if ( !m )
+          return new Response( file, { status: 200, headers: { 'Content-Type': type, 'Accept-Ranges': 'bytes' } } );
+        var s = parseInt( m[ 1 ], 10 );
+        var e = m[ 2 ] ? parseInt( m[ 2 ], 10 ) : file.size - 1;
+        if ( s >= file.size ) return new Response( null, { status: 416, headers: { 'Content-Range': 'bytes */' + file.size } } );
+        e = Math.min( e, file.size - 1 );
+        return new Response( file.slice( s, e + 1 ), {
+          status: 206,
+          headers: {
+            'Content-Type': type,
+            'Content-Range': 'bytes ' + s + '-' + e + '/' + file.size,
+            'Content-Length': String( e - s + 1 ),
+            'Accept-Ranges': 'bytes'
+          }
+        } );
+      }
+      if ( _fetch )
+      {
+        window.fetch = function ( input, init )
+        {
+          var url = typeof input === 'string' ? input : ( input && input.url ? input.url : String( input ) );
+          if ( url && url.indexOf( 'tlxopfs://' ) === 0 )
+            return opfsRespond( url, init ).catch( function ( e )
+            {
+              return new Response( String( ( e && e.message ) || e ), { status: 404 } );
+            } );
+          return _fetch( input, init );
+        };
+      }
+
+      /* ---------------------------------------------------------------- 仓库解析 */
+      function parseRepo ( input )
+      {
+        var s = String( input || '' ).trim();
+        if ( !s ) throw new Error( '请输入仓库 ID 或链接' );
+        if ( /^https?:\/\//i.test( s ) )
+        {
+          var u = new URL( s );
+          var host = u.hostname.toLowerCase();
+          var p = u.pathname.split( '/' ).filter( Boolean );
+          if ( host === 'huggingface.co' || host === 'www.huggingface.co' || host === 'hf-mirror.com' )
+          {
+            if ( p.length < 2 ) throw new Error( '链接里没有仓库 ID（应为 /组织/仓库）' );
+            var id = p[ 0 ] + '/' + p[ 1 ];
+            var hub = host === 'hf-mirror.com' ? 'hf-mirror.com' : 'huggingface.co';
+            return { id: id, base: 'https://' + hub + '/' + id + '/resolve/main', name: p[ 1 ] };
+          }
+          if ( /modelscope\.(cn|ai)$/.test( host ) || host === 'www.modelscope.cn' )
+          {
+            // 魔搭：/models/{org}/{repo} → HF 兼容的 resolve 布局
+            var i0 = p.indexOf( 'models' );
+            if ( i0 < 0 || p.length < i0 + 3 ) throw new Error( '魔搭链接里没有仓库 ID（应为 /models/组织/仓库）' );
+            var mid = p[ i0 + 1 ] + '/' + p[ i0 + 2 ];
+            return { id: mid, base: 'https://modelscope.cn/models/' + mid + '/resolve/master', name: p[ i0 + 2 ] };
+          }
+          return { id: p.slice( -2 ).join( '/' ) || host, base: s.replace( /\/+$/, '' ), name: p.slice( -1 )[ 0 ] || host };
+        }
+        if ( s.indexOf( '/' ) > 0 ) return { id: s, base: 'https://huggingface.co/' + s + '/resolve/main', name: s.split( '/' ).pop() };
+        throw new Error( '格式应为 组织/仓库（如 Qwen/Qwen2.5-0.5B-Instruct）' );
+      }
+      function archFromConfig ( cfg )
+      {
+        var t = String( ( cfg && cfg.model_type ) || '' ).toLowerCase();
+        if ( t.indexOf( 'qwen3_5' ) === 0 || t.indexOf( 'qwen3.5' ) === 0 ) return 'qwen3.5-0.8b';
+        if ( t.indexOf( 'llama' ) === 0 ) return 'llama3.2-1b';
+        if ( t.indexOf( 'gemma' ) === 0 ) return 'gemma-2b';
+        if ( t.indexOf( 'bitnet' ) === 0 ) return 'bitnet-2b';
+        if ( t.indexOf( 'deepseek' ) === 0 ) return 'deepseek-r1-qwen-1.5b';
+        return 'qwen2.5-0.5b';
+      }
+      async function headSize ( url )
+      {
+        try
+        {
+          var r = await _fetch( url, { method: 'HEAD' } );
+          if ( r.ok )
+          {
+            var n = parseInt( r.headers.get( 'content-length' ) || '0', 10 );
+            if ( n > 0 ) return n;
+          }
+        } catch ( e ) { }
+        try
+        {
+          var r2 = await _fetch( url, { headers: { Range: 'bytes=0-0' } } );
+          if ( r2.status === 416 ) return 0;
+          if ( r2.ok || r2.status === 206 )
+          {
+            var m = /\/(\d+)$/.exec( r2.headers.get( 'content-range' ) || '' );
+            if ( m ) return parseInt( m[ 1 ], 10 );
+            var cl = parseInt( r2.headers.get( 'content-length' ) || '0', 10 );
+            return cl > 1 ? cl : null; // 1 = 只回了一个字节，真实大小未知
+          }
+          return null;
+        } catch ( e ) { return null; }
+      }
+
+      /* ---------------------------------------------------------------- 解析（不下载） */
+      async function plan ( input )
+      {
+        var p = parseRepo( input );
+        // 自动换源：HF 直连在国内常被墙，依次尝试 hf-mirror 与魔搭
+        var bases = [ p.base ];
+        if ( /huggingface\.co/.test( p.base ) )
+          bases.push( 'https://hf-mirror.com/' + p.id + '/resolve/main', 'https://modelscope.cn/models/' + p.id + '/resolve/master' );
+        var cfgRes = null, base = p.base, lastErr = '';
+        for ( var bi = 0; bi < bases.length; bi++ )
+        {
+          try
+          {
+            var r0 = await _fetch( bases[ bi ] + '/config.json' );
+            if ( r0.ok ) { cfgRes = r0; base = bases[ bi ]; break; }
+            lastErr = 'HTTP ' + r0.status;
+          }
+          catch ( e ) { lastErr = e.message; }
+        }
+        if ( !cfgRes ) throw new Error( '无法连接 ' + ( new URL( p.base ) ).host + '：HF / hf-mirror / 魔搭 均失败（' + lastErr + '）' );
+        p.base = base;
+        var cfg = await cfgRes.json();
+        var arch = archFromConfig( cfg );
+        var files = [ 'config.json', 'tokenizer.json' ];
+        var idx = null;
+        try
+        {
+          var r = await _fetch( p.base + '/model.safetensors.index.json' );
+          if ( r.ok ) idx = await r.json();
+        } catch ( e ) { }
+        if ( idx && idx.weight_map )
+        {
+          var shards = Array.from( new Set( Object.keys( idx.weight_map ).map( function ( k ) { return idx.weight_map[ k ]; } ) ) ).sort();
+          files = files.concat( [ 'model.safetensors.index.json' ] ).concat( shards );
+        }
+        else files.push( 'model.safetensors' );
+
+        var metas = [];
+        for ( var i = 0; i < files.length; i++ )
+        {
+          var url = p.base + '/' + files[ i ];
+          var size = await headSize( url );
+          if ( size === null )
+          {
+            if ( files[ i ].indexOf( 'index.json' ) >= 0 ) continue; // 可选文件
+            // 魔搭等源不返回 Content-Length：大小记为 0，下载时不做大小校验
+            metas.push( { name: files[ i ], url: url, size: 0, unknown: true } );
+            continue;
+          }
+          metas.push( { name: files[ i ], url: url, size: size } );
+        }
+        var total = metas.reduce( function ( a, b ) { return a + b.size; }, 0 );
+        var archName = arch;
+        try { var a2 = api().getArchitecture( arch ); if ( a2 ) archName = a2.name; } catch ( e ) { }
+        return {
+          key: p.id.replace( /[\\/:*?"<>|]/g, '__' ),
+          id: p.id, name: p.name, base: p.base, arch: arch, archName: archName,
+          files: metas, totalBytes: total
+        };
+      }
+
+      /* ---------------------------------------------------------------- 持久化 */
+      // 申请「持久存储」：避免浏览器在磁盘紧张时把已下载的权重清掉
+      async function requestPersist ()
+      {
+        try
+        {
+          if ( !navigator.storage || !navigator.storage.persist ) return { ok: false, reason: '当前浏览器不支持持久化申请' };
+          if ( await navigator.storage.persisted() ) return { ok: true, already: true };
+          return { ok: await navigator.storage.persist(), already: false };
+        } catch ( e ) { return { ok: false, reason: e.message }; }
+      }
+      async function fileSize ( dir, name )
+      {
+        try { return ( await ( await dir.getFileHandle( name ) ).getFile() ).size; } catch ( e ) { return 0; }
+      }
+
+      /* ---------------------------------------------------------------- 下载 */
+      async function download ( input, onProg )
+      {
+        var rep = function ( p ) { try { if ( onProg ) onProg( p ); } catch ( e ) { } };
+        rep( { phase: 'resolve', message: '解析仓库…' } );
+        var pl = await plan( input );
+        lastPlan = pl;
+        rep( { phase: 'resolve', plan: pl, message: '共 ' + pl.files.length + ' 个文件 · ' + bytes( pl.totalBytes ) } );
+        var dir = await modelDir( pl.key, true );
+        // 续传：已存在且大小正确的文件直接跳过，半截文件用 Range 从断点续
+        var done = 0;
+        for ( var k0 = 0; k0 < pl.files.length; k0++ )
+        {
+          var have0 = await fileSize( dir, pl.files[ k0 ].name );
+          if ( have0 === pl.files[ k0 ].size ) done += have0;
+          else if ( have0 > pl.files[ k0 ].size ) done += 0;
+        }
+        for ( var i = 0; i < pl.files.length; i++ )
+        {
+          var f = pl.files[ i ];
+          var have = await fileSize( dir, f.name );
+          if ( have === f.size && f.size > 0 )
+          {
+            rep( { phase: 'download', file: f.name, loadedBytes: done, totalBytes: pl.totalBytes, message: f.name + ' 已在本地，跳过' } );
+            continue;
+          }
+          var resumeAt = ( have > 0 && have < f.size ) ? have : 0;
+          rep( {
+            phase: 'download', file: f.name, loadedBytes: done, totalBytes: pl.totalBytes,
+            message: ( resumeAt ? '续传 ' : '下载 ' ) + f.name + ' · ' + bytes( done ) + ' / ' + bytes( pl.totalBytes )
+          } );
+          var res = await _fetch( f.url, resumeAt ? { headers: { Range: 'bytes=' + resumeAt + '-' } } : undefined );
+          if ( resumeAt && res.status !== 206 ) resumeAt = 0; // 服务端不支持 Range → 从头来
+          if ( resumeAt === 0 && !res.ok && res.status !== 206 ) throw new Error( '下载失败 ' + f.name + '（HTTP ' + res.status + '）' );
+          if ( resumeAt ) done += resumeAt;
+          var fh = await dir.getFileHandle( f.name, { create: true } );
+          var w = await fh.createWritable( { keepExistingData: resumeAt > 0 } );
+          if ( resumeAt ) await w.seek( resumeAt );
+          if ( res.body && res.body.getReader )
+          {
+            var reader = res.body.getReader();
+            while ( true )
+            {
+              var rd = await reader.read();
+              if ( rd.done ) break;
+              await w.write( rd.value );
+              done += rd.value.length;
+              rep( {
+                phase: 'download', file: f.name, loadedBytes: done, totalBytes: pl.totalBytes,
+                message: '下载 ' + f.name + ' · ' + bytes( done ) + ' / ' + bytes( pl.totalBytes )
+              } );
+            }
+          }
+          else
+          {
+            var buf = new Uint8Array( await res.arrayBuffer() );
+            await w.write( buf ); done += buf.length;
+          }
+          await w.close();
+          var got = await fileSize( dir, f.name );
+          if ( got !== f.size && f.size > 0 )
+            throw new Error( f.name + ' 大小不符（期望 ' + f.size + '，实际 ' + got + '），请重试续传' );
+          rep( {
+            phase: 'download', file: f.name, loadedBytes: done, totalBytes: pl.totalBytes,
+            message: '完成 ' + f.name + ' · ' + bytes( done ) + ' / ' + bytes( pl.totalBytes )
+          } );
+        }
+        // 以 OPFS 里的真实字节数为准（魔搭等源不给 Content-Length，plan 阶段拿不到大小）
+        var realFiles = [], realTotal = 0;
+        for ( var ri = 0; ri < pl.files.length; ri++ )
+        {
+          var rs = await fileSize( dir, pl.files[ ri ].name );
+          realFiles.push( { name: pl.files[ ri ].name, size: rs } );
+          realTotal += rs;
+        }
+        var meta = {
+          key: pl.key, id: pl.id, name: pl.name, arch: pl.arch,
+          files: realFiles,
+          totalBytes: realTotal, ts: Date.now(), base: pl.base
+        };
+        var mh = await dir.getFileHandle( '_meta.json', { create: true } );
+        var mw = await mh.createWritable();
+        await mw.write( JSON.stringify( meta, null, 2 ) );
+        await mw.close();
+        rep( { phase: 'done', loadedBytes: meta.totalBytes, totalBytes: meta.totalBytes, meta: meta, message: '下载完成：' + meta.name } );
+        return meta;
+      }
+
+      /* ---------------------------------------------------------------- 列表 / 删除 / 加载 */
+      async function list ()
+      {
+        var out = [];
+        try
+        {
+          var d = await modelsDir( false );
+          for await ( var h of d.values() )
+          {
+            if ( h.kind !== 'directory' ) continue;
+            try
+            {
+              var fh = await h.getFileHandle( '_meta.json' );
+              out.push( JSON.parse( await ( await fh.getFile() ).text() ) );
+            } catch ( e ) { }
+          }
+        } catch ( e ) { }
+        return out.sort( function ( a, b ) { return ( b.ts || 0 ) - ( a.ts || 0 ); } );
+      }
+      async function readMeta ( key )
+      {
+        try
+        {
+          var d = await modelDir( key, false );
+          var fh = await d.getFileHandle( '_meta.json' );
+          return JSON.parse( await ( await fh.getFile() ).text() );
+        } catch ( e ) { return null; }
+      }
+      async function remove ( key )
+      {
+        try
+        {
+          var d = await modelsDir( false );
+          await d.removeEntry( key, { recursive: true } );
+        } catch ( e ) { }
+        delete cache[ key ];
+      }
+      async function ensure ( key, onProg )
+      {
+        if ( cache[ key ] ) return cache[ key ];
+        var meta = await readMeta( key );
+        if ( !meta ) throw new Error( '模型不存在：' + key );
+        var A = api();
+        if ( !A ) throw new Error( '推理引擎未加载' );
+        var g = await A.gpu.ensure();
+        if ( !g.ok ) throw new Error( 'WebGPU 不可用：' + ( g.error || '未知错误' ) );
+        var r = await A.load.weights( meta.arch, 'tlxopfs://' + key, onProg );
+        var info = { key: key, name: meta.name, archId: meta.arch, model: r.model, tokenizer: r.tokenizer };
+        // 本地存有 LoRA 适配器就顺手套上（微调后的模型效果）
+        try
+        {
+          if ( window.TLX_FINETUNE && window.TLX_FINETUNE.readAdapter )
+          {
+            var ad = await window.TLX_FINETUNE.readAdapter( key );
+            if ( ad && ad.meta && ad.meta.tensors && ad.meta.tensors.length )
+            {
+              window.TLX_FINETUNE.applyAdapter( r.model, ad );
+              info.adapter = ad.meta;
+            }
+          }
+        }
+        catch ( e ) { console.warn( '[LoRA] 套用适配器失败', e ); }
+        cache[ key ] = info;
+        try { localStorage.setItem( 'ttllm.lastModel', key ); } catch ( e ) { }
+        return info;
+      }
+
+      /* ---------------------------------------------------------------- 界面 */
+      function dlgHtml ()
+      {
+        var d = document.createElement( 'div' );
+        d.className = 'cv-dlg';
+        d.id = 'mdlDlg';
+        d.innerHTML =
+          '<div class="cv-card">' +
+          '<div class="cv-card-h"><h3>模型 · 下载开源权重</h3><button class="btn ghost" id="mdlClose">关闭</button></div>' +
+          '<div class="cv-card-b">' +
+          '<div class="inline"><input id="mdlInput" type="text" placeholder="Qwen/Qwen2.5-0.5B-Instruct 或 huggingface 链接">' +
+          '<button class="btn" id="mdlResolve" style="flex:0 0 auto">解析</button></div>' +
+          '<div class="cv-hint">从 HuggingFace（或 hf-mirror 镜像）下载 <b>config.json / tokenizer.json / safetensors</b>，存进浏览器本地，之后免下载、可离线对话。首次加载需要 WebGPU。</div>' +
+          '<div id="mdlInfo"></div><div id="mdlFiles"></div>' +
+          '<div class="cv-prog"><i id="mdlProg"></i></div>' +
+          '<div class="cv-hint" id="mdlStat">尚未开始</div>' +
+          '<div class="cv-hint" style="margin-top:4px"><b>已下载</b></div>' +
+          '<div id="mdlList"></div>' +
+          '</div>' +
+          '<div class="cv-card-f">' +
+          '<button class="btn primary" id="mdlStart" disabled>下载并加载</button>' +
+          '<button class="btn" id="mdlRefresh">刷新</button>' +
+          '<label class="cv-hint" style="display:flex;gap:6px;align-items:center;margin-left:auto">' +
+          '<input type="checkbox" id="mdlAutoWarm" checked style="width:auto"> 启动时自动加载上次模型</label>' +
+          '<span class="cv-hint" id="mdlQuota" style="flex:1 1 100%"></span>' +
+          '</div></div>';
+        document.body.appendChild( d );
+        return d;
+      }
+      function setProg ( frac, text )
+      {
+        var i = $( 'mdlProg' ); if ( i ) i.style.width = Math.max( 0, Math.min( 100, frac * 100 ) ).toFixed( 1 ) + '%';
+        var s = $( 'mdlStat' ); if ( s ) s.textContent = text;
+      }
+      function archOptions ( cur )
+      {
+        var ids = [ 'qwen2.5-0.5b', 'llama3.2-1b', 'gemma-2b', 'bitnet-2b', 'deepseek-r1-qwen-1.5b', 'qwen3.5-0.8b' ];
+        try
+        {
+          var all = api().arch.list();
+          if ( all && all.length ) ids = all.map( function ( a ) { return a.id; } );
+        } catch ( e ) { }
+        return ids.map( function ( id )
+        {
+          var nm = id;
+          try { var a = api().getArchitecture( id ); if ( a ) nm = a.name; } catch ( e ) { }
+          return '<option value="' + id + '"' + ( id === cur ? ' selected' : '' ) + '>' + nm + '</option>';
+        } ).join( '' );
+      }
+      function renderPlan ( pl )
+      {
+        var info = $( 'mdlInfo' ), files = $( 'mdlFiles' );
+        if ( !info || !files ) return;
+        info.innerHTML = '<div class="cv-mrow"><span class="nm"><b>' + pl.name + '</b> · ' + pl.id + '</span>' +
+          '<span class="sz">' + ( pl.totalBytes ? bytes( pl.totalBytes ) : '大小未知' ) + '</span></div>' +
+          '<div class="cv-hint" style="margin-top:6px">识别架构：<b>' + pl.archName + '</b>（不对可以改，不确定就保持默认）</div>' +
+          '<div class="inline" style="margin-top:8px"><label class="fld" style="margin:0">按此架构加载</label>' +
+          '<select id="mdlArch" style="max-width:340px">' + archOptions( pl.arch ) + '</select></div>';
+        files.innerHTML = pl.files.map( function ( f )
+        {
+          return '<div class="cv-filerow" data-f="' + f.name + '"><span class="n">' + f.name + '</span><span class="s">' + bytes( f.size ) + '</span></div>';
+        } ).join( '' );
+        var st = $( 'mdlStart' ); if ( st ) st.disabled = false;
+      }
+      async function renderList ()
+      {
+        var box = $( 'mdlList' );
+        if ( !box ) return;
+        var arr = await list();
+        var last = '';
+        try { last = localStorage.getItem( 'ttllm.chatSrc' ) || ''; } catch ( e ) { }
+        if ( !arr.length ) box.innerHTML = '<div class="cv-hint">还没有下载过模型。</div>';
+        else
+        {
+          box.innerHTML = arr.map( function ( m )
+          {
+            var used = last === 'off:' + m.key;
+            return '<div class="cv-mrow" data-key="' + m.key + '"><span class="nm"><b>' + m.name + '</b> · ' + m.arch + '</span>' +
+              '<span class="sz">' + ( used ? '当前使用 · ' : '' ) + '已缓存 ' + bytes( m.totalBytes ) + '</span>' +
+              '<button class="btn" data-act="load">加载</button>' +
+              '<button class="btn ghost" data-act="del">删除</button></div>';
+          } ).join( '' );
+          box.querySelectorAll( '.cv-mrow' ).forEach( function ( row )
+          {
+            var key = row.dataset.key;
+            row.querySelector( '[data-act="load"]' ).onclick = function () { void loadAndUse( key ); };
+            row.querySelector( '[data-act="del"]' ).onclick = async function ()
+            {
+              await remove( key );
+              await renderList();
+              if ( window.__ttllm )
+              {
+                void window.__ttllm.refreshChatSelect();
+                if ( window.__ttllm.ModelCenter ) void window.__ttllm.ModelCenter.refresh();
+              }
+              if ( window.__renderMarket ) window.__renderMarket();
+            };
+          } );
+        }
+        try
+        {
+          var est = await navigator.storage.estimate();
+          var q = $( 'mdlQuota' );
+          var persisted = ( navigator.storage && navigator.storage.persisted ) ? await navigator.storage.persisted() : false;
+          if ( q ) q.textContent = '本地已用 ' + bytes( est.usage ) + ' / 可用 ' + bytes( est.quota ) +
+            ' · 持久存储：' + ( persisted ? '已开启' : '未授予' );
+        } catch ( e ) { }
+      }
+      // 打开页面时把「上次用的模型」从本地直接装回显存，免去每次手动加载
+      async function warmLast ()
+      {
+        var auto = '1';
+        try { auto = localStorage.getItem( 'ttllm.autoWarm' ) || '1'; } catch ( e ) { }
+        if ( auto !== '1' ) return;
+        var src = '';
+        try { src = localStorage.getItem( 'ttllm.chatSrc' ) || ''; } catch ( e ) { }
+        if ( src.indexOf( 'off:' ) !== 0 ) return;
+        var key = src.slice( 4 );
+        var meta = await readMeta( key );
+        if ( !meta || cache[ key ] ) return;
+        var setS = function ( t, k ) { try { if ( window.__cvStatus ) window.__cvStatus( t, k ); } catch ( e ) { } };
+        setS( '从本地加载 ' + meta.name + '…' );
+        try
+        {
+          await ensure( key, function ( p ) { setS( ( p && p.message ) || '加载中…' ); } );
+          setS( meta.name + ' · 就绪', 'ok' );
+        }
+        catch ( e ) { setS( '预加载失败：' + ( ( e && e.message ) || e ), 'bad' ); }
+      }
+      async function loadAndUse ( key )
+      {
+        try
+        {
+          setProg( 0.02, '加载中：' + key );
+          await ensure( key, function ( p )
+          {
+            var frac = p.totalBytes ? ( p.loadedBytes || 0 ) / p.totalBytes : 0.1;
+            setProg( 0.05 + frac * 0.9, p.message || p.phase );
+          } );
+          setProg( 1, '已加载，可以在对话里使用' );
+          var T = window.__ttllm;
+          if ( T )
+          {
+            T.S.pendingChatSelect = 'off:' + key;
+            await T.refreshChatSelect();
+            if ( T.ModelCenter ) await T.ModelCenter.refresh();
+            if ( window.__renderMarket ) window.__renderMarket();
+          }
+          setTimeout( close, 500 );
+        }
+        catch ( e )
+        {
+          setProg( 0, '加载失败：' + ( ( e && e.message ) || e ) );
+        }
+      }
+      // 外部入口：带上仓库地址打开下载框，并自动解析
+      function openWith ( repo )
+      {
+        open();
+        var inp = $( 'mdlInput' );
+        if ( inp && repo ) inp.value = String( repo );
+        if ( inp ) setTimeout( function ()
+        {
+          inp.focus();
+          var b = $( 'mdlResolve' );
+          if ( b && inp.value.trim() ) b.click();
+        }, 60 );
+      }
+      function open ()
+      {
+        var d = $( 'mdlDlg' ) || dlgHtml();
+        d.classList.add( 'on' );
+        void renderList();
+        var aw = $( 'mdlAutoWarm' );
+        if ( aw )
+        {
+          var v = '1';
+          try { v = localStorage.getItem( 'ttllm.autoWarm' ) || '1'; } catch ( e ) { }
+          aw.checked = v === '1';
+        }
+        var inp = $( 'mdlInput' );
+        if ( inp ) setTimeout( function () { inp.focus(); }, 30 );
+      }
+      function close ()
+      {
+        var d = $( 'mdlDlg' ); if ( d ) d.classList.remove( 'on' );
+      }
+      async function doResolve ()
+      {
+        var v = $( 'mdlInput' ).value.trim();
+        if ( !v ) return;
+        setProg( 0, '解析中…' );
+        try
+        {
+          var pl = await plan( v );
+          renderPlan( pl );
+          setProg( 0, '已解析：' + pl.files.length + ' 个文件 · ' + bytes( pl.totalBytes ) );
+        }
+        catch ( e ) { setProg( 0, '解析失败：' + ( ( e && e.message ) || e ) ); }
+      }
+      async function doDownload ()
+      {
+        var v = $( 'mdlInput' ).value.trim();
+        if ( !v ) return;
+        var sel = $( 'mdlArch' );
+        var arch = sel ? sel.value : null;
+        $( 'mdlStart' ).disabled = true;
+        [ 'mdlInput', 'mdlResolve', 'mdlRefresh' ].forEach( function ( id ) { var e = $( id ); if ( e ) e.disabled = true; } );
+        try
+        {
+          var pst = await requestPersist();
+          if ( !pst.ok ) setProg( 0, '提示：浏览器未授予持久存储，权重仍会保存，但磁盘紧张时可能被清理' );
+          var meta = await download( v, function ( p )
+          {
+            // 总大小未知时（魔搭）不给假进度，只报已下载字节
+            if ( p.totalBytes ) setProg( ( p.loadedBytes || 0 ) / p.totalBytes, p.message || p.phase );
+            else setProg( 0, ( p.message || p.phase ) + '（源未提供总大小，按已下载字节计）' );
+          } );
+          if ( arch && arch !== meta.arch )
+          {
+            meta.arch = arch;
+            var dir = await modelDir( meta.key, true );
+            var fh = await dir.getFileHandle( '_meta.json', { create: true } );
+            var w = await fh.createWritable();
+            await w.write( JSON.stringify( meta, null, 2 ) );
+            await w.close();
+          }
+          await renderList();
+          setProg( 0.99, '下载完成，正在装入推理引擎…' );
+          await loadAndUse( meta.key );
+        }
+        catch ( e ) { setProg( 0, '失败：' + ( ( e && e.message ) || e ) ); }
+        finally { if ( $( 'mdlStart' ) ) $( 'mdlStart' ).disabled = false;
+          [ 'mdlInput', 'mdlResolve', 'mdlRefresh' ].forEach( function ( id ) { var e = $( id ); if ( e ) e.disabled = false; } ); }
+      }
+      function bindDialog ()
+      {
+        var d = $( 'mdlDlg' );
+        if ( !d ) return;
+        $( 'mdlClose' ).onclick = close;
+        d.onclick = function ( e ) { if ( e.target === d ) close(); };
+        $( 'mdlRefresh' ).onclick = function () { void renderList(); };
+        $( 'mdlResolve' ).onclick = function () { void doResolve(); };
+        $( 'mdlInput' ).addEventListener( 'keydown', function ( e )
+        {
+          if ( e.key === 'Enter' ) { e.preventDefault(); void doResolve(); }
+        } );
+        $( 'mdlStart' ).onclick = function () { void doDownload(); };
+        var aw = $( 'mdlAutoWarm' );
+        if ( aw ) aw.onchange = function ()
+        {
+          try { localStorage.setItem( 'ttllm.autoWarm', this.checked ? '1' : '0' ); } catch ( e ) { }
+        };
+      }
+
+      window.TLX_MODELS = {
+        list: list, plan: plan, download: download, ensure: ensure, remove: remove,
+        open: open, openWith: openWith, close: close, cache: cache, _lastPlan: function () { return lastPlan; }
+      };
+
+      function boot ()
+      {
+        dlgHtml();
+        bindDialog();
+        // 免得每次打开都手动加载：上次用的开源模型直接从本地装回显存
+        setTimeout( function () { if ( document.visibilityState !== 'hidden' ) void warmLast(); }, 2500 );
+        // 让模型中心在 OPFS 就绪后补一次列表（首屏渲染时本模块尚未加载）
+        setTimeout( function ()
+        {
+          var T = window.__ttllm;
+          if ( T && T.ModelCenter ) void T.ModelCenter.refresh();
+        }, 600 );
+      }
+      if ( document.readyState === 'loading' ) document.addEventListener( 'DOMContentLoaded', boot );
+      else boot();
+    } )();
+  </script>
+
+  <script id="tlxFinetune">
+    /* ==================================================================================
+       TLX_FINETUNE · 在浏览器里用 LoRA 微调开源模型
+       前提（已验证）：__ENGINE__.ops 是带自动微分的算子层（backward / zeroParamGrads /
+       adamwStep + ropeBwd / attnBwdS / siluBwd / embedBwd … 反向内核），推理路径只是把
+       setGraphBuilding(false) 关掉了。
+       本模块：
+         1) 打开构图，冻结基座，只在 q/k/v/o/gate/up/down 上挂 LoRA（ΔW = B·A）
+         2) 前向 → 交叉熵 → 反向 → AdamW（只更新 A/B，基座不占梯度显存）
+         3) 适配器存 OPFS（_lora.bin + _lora.json）
+       ================================================================================== */
+    ( function ()
+    {
+      'use strict';
+      var $ = function ( id ) { return document.getElementById( id ); };
+      function api () { return window.__ENGINE__ && window.__ENGINE__.api; }
+      function ops () { return api().ops; }
+      function el ( p ) { var n = 1; for ( var i = 0; i < p.shape.length; i++ ) n *= p.shape[ i ]; return n; }
+      function bytes ( n )
+      {
+        if ( !n && n !== 0 ) return '—';
+        var u = [ 'B', 'KB', 'MB', 'GB' ], i = 0;
+        while ( n >= 1024 && i < u.length - 1 ) { n /= 1024; i++; }
+        return ( i === 0 ? n : n.toFixed( 1 ) ) + ' ' + u[ i ];
+      }
+      var TARGETS = [ 'q_proj', 'k_proj', 'v_proj', 'o_proj', 'gate_proj', 'up_proj', 'down_proj' ];
+
+      /* ---------------------------------------------------------------- 冻结基座 + 挂 LoRA */
+      function install ( model, opts )
+      {
+        var o = ops();
+        var R = Math.max( 1, ( opts && opts.rank ) || 8 );
+        var lora = [], byName = {};
+        model.params.forEach( function ( p ) { p.requiresGrad = false; } );
+        Object.keys( model.P ).forEach( function ( name )
+        {
+          var W = model.P[ name ];
+          if ( !W || !W.shape || W.shape.length !== 2 ) return;
+          var hit = false;
+          for ( var i = 0; i < TARGETS.length; i++ ) if ( name.indexOf( TARGETS[ i ] ) >= 0 ) { hit = true; break; }
+          if ( !hit ) return;
+          var out = W.shape[ 0 ], inn = W.shape[ 1 ];
+          var aData = new Float32Array( R * inn );
+          for ( var k = 0; k < aData.length; k++ ) aData[ k ] = ( Math.random() * 2 - 1 ) / Math.sqrt( inn );
+          var A = o.tensor( o.createBuffer( aData ), [ R, inn ], true );
+          var B = o.tensor( o.createBuffer( new Float32Array( out * R ) ), [ out, R ], true );
+          model.P[ name ] = o.add( W, o.matmul( B, A ) );
+          var rec = { name: name, W: W, A: A, B: B, out: out, inn: inn, r: R };
+          lora.push( rec ); byName[ name ] = rec;
+        } );
+        var params = [], ms = [], vs = [];
+        lora.forEach( function ( t )
+        {
+          [ t.A, t.B ].forEach( function ( p )
+          {
+            params.push( p );
+            ms.push( o.createBuffer( new Float32Array( el( p ) ) ) );
+            vs.push( o.createBuffer( new Float32Array( el( p ) ) ) );
+          } );
+        } );
+        return { model: model, lora: lora, byName: byName, params: params, ms: ms, vs: vs, rank: R, step: 0, stopped: false, rebind: function ()
+        {
+          // 动态图：A/B 每步都会变，ΔW 必须重算，不能复用上一次的图节点
+          for ( var i = 0; i < lora.length; i++ )
+          {
+            var t = lora[ i ];
+            model.P[ t.name ] = o.add( t.W, o.matmul( t.B, t.A ) );
+          }
+        } };
+      }
+
+      /* ---------------------------------------------------------------- 一步 */
+      // promptLen：prompt 的 token 数。>0 时只在回答段计损失（标准 SFT 做法）
+      async function trainStep ( state, ids, lr, promptLen )
+      {
+        var o = ops();
+        if ( o.resetGraph ) o.resetGraph();
+        state.rebind();
+        var out = state.model.forward( ids, {} );
+        var logits = out.logits || out;
+        var tgt = ids.slice( 1 );
+        var cr = o.crossEntropy( logits, tgt );
+        var lossTok = cr.lossTensor;
+        var loss;
+        var from = Math.max( 0, ( promptLen || 0 ) - 1 );   // 第 t 个 logit 预测 ids[t+1]
+        var nAns = tgt.length - from;
+        if ( promptLen > 0 && nAns > 0 && nAns < tgt.length )
+        {
+          // 逐 token 损失 × 掩码：prompt 段权重 0，回答段权重 1
+          var mask = new Float32Array( tgt.length );
+          for ( var i = from; i < tgt.length; i++ ) mask[ i ] = 1;
+          var mt = o.tensor( o.createBuffer( mask ), [ tgt.length ], false );
+          loss = o.meanLoss( o.mul( lossTok, mt ), nAns, 1 );
+        }
+        else loss = o.meanLoss( lossTok, tgt.length, 1 );
+        var val = ( await o.download( loss.data, 1 ) )[ 0 ];
+        o.zeroParamGrads( state.params );
+        o.backward( loss );
+        state.step++;
+        // 只更新这一轮真正拿到梯度的参数（没被前向用到的层会保持为 null，传进内核会崩）
+        var ps = [], mm = [], vv = [];
+        for ( var i = 0; i < state.params.length; i++ )
+        {
+          if ( !state.params[ i ].grad ) continue;
+          ps.push( state.params[ i ] ); mm.push( state.ms[ i ] ); vv.push( state.vs[ i ] );
+        }
+        o.adamwStep( ps, mm, vv, lr, 0.9, 0.999, 0, 1e-8, state.step );
+        return val;
+      }
+
+      /* ---------------------------------------------------------------- 数据 */
+      async function chatPairs ()
+      {
+        return await new Promise( function ( res )
+        {
+          var rq = indexedDB.open( 'tlx-chat-v1', 1 );
+          rq.onupgradeneeded = function ()
+          {
+            var db = rq.result;
+            if ( !db.objectStoreNames.contains( 'sessions' ) ) db.createObjectStore( 'sessions', { keyPath: 'id' } );
+          };
+          rq.onerror = function () { res( [] ); };
+          rq.onsuccess = function ()
+          {
+            var db = rq.result;
+            if ( !db.objectStoreNames.contains( 'sessions' ) ) { res( [] ); return; }
+            var all = db.transaction( 'sessions', 'readonly' ).objectStore( 'sessions' ).getAll();
+            all.onerror = function () { res( [] ); };
+            all.onsuccess = function ()
+            {
+              var out = [];
+              ( all.result || [] ).forEach( function ( s )
+              {
+                var ms = ( s.msgs || [] ).filter( function ( m ) { return m.role === 'user' || m.role === 'bot'; } );
+                for ( var i = 0; i < ms.length - 1; i++ )
+                  if ( ms[ i ].role === 'user' && ms[ i + 1 ].role === 'bot' && ms[ i + 1 ].text )
+                    out.push( { p: ms[ i ].text, r: ms[ i + 1 ].text } );
+              } );
+              res( out );
+            };
+          };
+        } );
+      }
+
+      /* ---------------------------------------------------------------- 适配器读写（多适配器） */
+      async function modelDir ( key, create )
+      {
+        var root = await navigator.storage.getDirectory();
+        var d = await root.getDirectoryHandle( 'tlx-models', { create: !!create } );
+        return await d.getDirectoryHandle( key, { create: !!create } );
+      }
+      async function loraDir ( key, create )
+      {
+        var d = await modelDir( key, create );
+        return await d.getDirectoryHandle( '_lora', { create: !!create } );
+      }
+      async function readIndex ( key )
+      {
+        try
+        {
+          var d = await loraDir( key, false );
+          var t = await ( await ( await d.getFileHandle( 'index.json' ) ).getFile() ).text();
+          var j = JSON.parse( t );
+          if ( !j.items ) j.items = [];
+          return j;
+        } catch ( e ) { return null; }
+      }
+      async function writeIndex ( key, idx )
+      {
+        var d = await loraDir( key, true );
+        var fh = await d.getFileHandle( 'index.json', { create: true } );
+        var w = await fh.createWritable();
+        await w.write( JSON.stringify( idx ) );
+        await w.close();
+      }
+      async function saveAdapter ( key, state, name )
+      {
+        var o = ops(), parts = [], index = [], off = 0;
+        for ( var i = 0; i < state.lora.length; i++ )
+        {
+          var t = state.lora[ i ];
+          var a = await o.download( t.A.data, el( t.A ) );
+          var b = await o.download( t.B.data, el( t.B ) );
+          parts.push( a, b );
+          index.push( { name: t.name, r: t.r, out: t.out, inn: t.inn, aOff: off, aLen: a.length, bOff: off + a.length, bLen: b.length } );
+          off += a.length + b.length;
+        }
+        var buf = new Float32Array( off ), p = 0;
+        parts.forEach( function ( x ) { buf.set( x, p ); p += x.length; } );
+        var id = 'L' + Date.now().toString( 36 );
+        var d = await loraDir( key, true );
+        var fh = await d.getFileHandle( id + '.bin', { create: true } );
+        var w = await fh.createWritable(); await w.write( buf ); await w.close();
+        var meta = { id: id, name: name || 'lora', rank: state.rank, step: state.step, ts: Date.now(), tensors: index, floats: off };
+        var mh = await d.getFileHandle( id + '.json', { create: true } );
+        var mw = await mh.createWritable(); await mw.write( JSON.stringify( meta ) ); await mw.close();
+        var idx = ( await readIndex( key ) ) || { active: null, items: [] };
+        idx.items = idx.items.filter( function ( x ) { return x.id !== id; } );
+        idx.items.unshift( { id: id, name: meta.name, rank: meta.rank, step: meta.step, ts: meta.ts, floats: meta.floats } );
+        idx.active = id;
+        await writeIndex( key, idx );
+        return { meta: meta, bytes: off * 4, id: id };
+      }
+      async function readAdapter ( key, id )
+      {
+        try
+        {
+          var idx = await readIndex( key );
+          var target = id || ( idx && idx.active );
+          if ( idx && target )
+          {
+            var item = null;
+            for ( var i = 0; i < idx.items.length; i++ ) if ( idx.items[ i ].id === target ) { item = idx.items[ i ]; break; }
+            if ( !item ) return null;
+            var d = await loraDir( key, false );
+            var meta = JSON.parse( await ( await ( await d.getFileHandle( target + '.json' ) ).getFile() ).text() );
+            var bin = await ( await ( await d.getFileHandle( target + '.bin' ) ).getFile() ).arrayBuffer();
+            return { meta: meta, data: new Float32Array( bin ), id: target };
+          }
+        } catch ( e ) { /* 落到旧格式 */ }
+        try
+        {
+          var md = await modelDir( key, false );
+          var m2 = JSON.parse( await ( await ( await md.getFileHandle( '_lora.json' ) ).getFile() ).text() );
+          var b2 = await ( await ( await md.getFileHandle( '_lora.bin' ) ).getFile() ).arrayBuffer();
+          return { meta: m2, data: new Float32Array( b2 ), id: 'legacy' };
+        } catch ( e ) { return null; }
+      }
+      async function listAdapters ( key )
+      {
+        var idx = await readIndex( key );
+        if ( idx && idx.items.length ) return { active: idx.active, items: idx.items };
+        var legacy = await readAdapter( key );
+        if ( legacy && legacy.id === 'legacy' )
+          return { active: 'legacy', items: [ { id: 'legacy', name: legacy.meta.name || '旧格式适配器', rank: legacy.meta.rank, step: legacy.meta.step, ts: legacy.meta.ts, floats: legacy.meta.floats } ] };
+        return { active: null, items: [] };
+      }
+      async function setActive ( key, id )
+      {
+        var idx = ( await readIndex( key ) ) || { active: null, items: [] };
+        idx.active = id || null;
+        await writeIndex( key, idx );
+        return idx;
+      }
+      async function removeAdapter ( key, id )
+      {
+        if ( id === 'legacy' )
+        {
+          try
+          {
+            var md = await modelDir( key, false );
+            await md.removeEntry( '_lora.json' ); await md.removeEntry( '_lora.bin' );
+          } catch ( e ) { }
+          return;
+        }
+        try
+        {
+          var d = await loraDir( key, false );
+          await d.removeEntry( id + '.bin' ); await d.removeEntry( id + '.json' );
+        } catch ( e ) { }
+        var idx = ( await readIndex( key ) ) || { active: null, items: [] };
+        idx.items = idx.items.filter( function ( x ) { return x.id !== id; } );
+        if ( idx.active === id ) idx.active = idx.items.length ? idx.items[ 0 ].id : null;
+        await writeIndex( key, idx );
+      }
+      function applyAdapter ( model, ad )
+      {
+        var o = ops();
+        ad.meta.tensors.forEach( function ( t )
+        {
+          var W = model.P[ t.name ];
+          if ( !W || !W.shape ) return;
+          var A = o.tensor( o.createBuffer( ad.data.slice( t.aOff, t.aOff + t.aLen ) ), [ t.r, t.inn ], false );
+          var B = o.tensor( o.createBuffer( ad.data.slice( t.bOff, t.bOff + t.bLen ) ), [ t.out, t.r ], false );
+          model.P[ t.name ] = o.add( W, o.matmul( B, A ) );
+        } );
+      }
+
+      /* ---------------------------------------------------------------- 训练器 */
+      var ST = null;
+      async function start ( cfg, onProgress )
+      {
+        var A = api();
+        var g = await A.gpu.ensure();
+        if ( !g.ok ) throw new Error( 'WebGPU 不可用：' + ( g.error || '' ) );
+        var info = await window.TLX_MODELS.ensure( cfg.key, function ( p )
+        {
+          if ( onProgress ) onProgress( { phase: 'load', message: p.message || p.phase } );
+        } );
+        ops().setGraphBuilding( true );
+        // 加载模型时若开过 GPU 工作区，池里的 buffer 会被回收复用 → 训练读数会变成 0。
+        // 训练期间不需要池化（每步末尾都会 resetGraph），先关掉。
+        try { var ws = ops().workspaceStats && ops().workspaceStats(); if ( ws && ws.active ) ops().workspaceEnd(); } catch ( e ) { }
+        var st = install( info.model, { rank: cfg.rank } );
+        ST = st;
+        var pairs = ( cfg.pairs && cfg.pairs.length ) ? cfg.pairs : await chatPairs();
+        if ( !pairs.length ) throw new Error( '没有训练数据' );
+        var tok = info.tokenizer, maxLen = cfg.maxLen || 192, seqs = [];
+        pairs.forEach( function ( pr )
+        {
+          var pIds = tok.encode( String( pr.p ).trim() );
+          var rIds = tok.encode( ' ' + String( pr.r ).trim() );
+          if ( !rIds.length ) return;
+          // 超长时先裁 prompt，保住完整回答（回答才是要学的目标）
+          var room = Math.max( 8, maxLen - rIds.length );
+          if ( pIds.length > room ) pIds = pIds.slice( pIds.length - room );
+          var ids = pIds.concat( rIds );
+          if ( ids.length < 4 ) return;
+          if ( ids.length > maxLen ) ids = ids.slice( 0, maxLen );
+          var plen = Math.min( pIds.length, ids.length - 1 );
+          if ( plen < 1 ) return;
+          seqs.push( { ids: ids, p: plen } );
+        } );
+        if ( !seqs.length ) throw new Error( '训练数据无法编码（分词器不认这些字）' );
+        var lr = cfg.lr || 3e-3, loss = 0, hist = [];
+        try
+        {
+          for ( var step = 0; step < cfg.steps; step++ )
+          {
+            if ( st.stopped ) break;
+            var one = seqs[ step % seqs.length ];
+            loss = await trainStep( st, one.ids, lr, one.p );
+            hist.push( loss );
+            if ( onProgress && ( step % 2 === 0 || step === cfg.steps - 1 ) )
+              onProgress( { phase: 'train', step: step + 1, steps: cfg.steps, loss: loss, pairs: seqs.length } );
+            await new Promise( function ( r ) { setTimeout( r, 0 ); } );
+          }
+        }
+        finally
+        {
+          // 无论成功/中断都要关掉构图，否则后续推理会把中间量全留在图里
+          st.rebind();
+          ops().setGraphBuilding( false );
+        }
+        return { loss: loss, hist: hist, pairs: seqs.length, rank: st.rank, lora: st.lora.length };
+      }
+      function stop () { if ( ST ) ST.stopped = true; }
+
+      /* ---------------------------------------------------------------- 界面 */
+      var UI = null;
+      function dlg ()
+      {
+        if ( UI ) return UI;
+        var d = document.createElement( 'div' );
+        d.className = 'cv-dlg';
+        d.id = 'ftDlg';
+        d.innerHTML =
+          '<div class="cv-card" style="width:min(620px,100%)">' +
+          '<div class="cv-card-h"><h3>微调 · LoRA</h3><button class="btn ghost" id="ftClose">关闭</button></div>' +
+          '<div class="cv-card-b">' +
+          '<div class="cv-hint">冻结基座，只训练低秩适配器；数据来自你的对话记录。训练完成后适配器存到本地，下次加载该模型自动套用。</div>' +
+          '<div class="inline"><label class="fld" style="margin:0">模型</label><select id="ftModel" style="flex:1"></select></div>' +
+          '<div class="grid2" style="gap:10px">' +
+          '<div><label class="fld">LoRA 秩</label><input id="ftRank" type="number" value="8" min="1" max="64"></div>' +
+          '<div><label class="fld">训练步数</label><input id="ftSteps" type="number" value="60" min="1" max="5000"></div>' +
+          '<div><label class="fld">学习率</label><input id="ftLr" type="number" value="0.003" step="0.001" min="0.00001"></div>' +
+          '<div><label class="fld">序列长度上限</label><input id="ftMaxLen" type="number" value="192" min="16" max="1024" step="16"></div>' +
+          '</div>' +
+          '<div class="cv-hint" id="ftData">正在统计对话数据…</div>' +
+          '<div id="ftAdapters" style="display:flex;flex-direction:column;gap:6px"></div>' +
+          '<div class="cv-prog"><i id="ftProg"></i></div>' +
+          '<div class="cv-hint" id="ftStat">尚未开始</div>' +
+          '</div>' +
+          '<div class="cv-card-f">' +
+          '<button class="btn primary" id="ftStart">开始微调</button>' +
+          '<button class="btn" id="ftStop" disabled>停止</button>' +
+          '<span class="cv-hint" id="ftOut"></span>' +
+          '</div></div>';
+        document.body.appendChild( d );
+        UI = d;
+        $( 'ftClose' ).onclick = function () { d.classList.remove( 'on' ); };
+        d.onclick = function ( e ) { if ( e.target === d ) d.classList.remove( 'on' ); };
+        $( 'ftStop' ).onclick = stop;
+        $( 'ftStart' ).onclick = function () { void run(); };
+        return d;
+      }
+      async function renderAdapters ( key )
+      {
+        var box = $( 'ftAdapters' );
+        if ( !box ) return;
+        box.innerHTML = '';
+        if ( !key ) return;
+        var r = await listAdapters( key );
+        if ( !r.items.length )
+        {
+          var e = document.createElement( 'div' );
+          e.className = 'cv-hint';
+          e.textContent = '这个模型还没有适配器。';
+          box.appendChild( e );
+          return;
+        }
+        var head = document.createElement( 'div' );
+        head.className = 'cv-hint';
+        head.textContent = '已保存的适配器（当前生效的会在加载模型时自动套用）';
+        box.appendChild( head );
+        r.items.forEach( function ( it )
+        {
+          var row = document.createElement( 'div' );
+          row.className = 'cv-mrow';
+          var nm = document.createElement( 'span' );
+          nm.className = 'nm';
+          nm.innerHTML = '<b>' + it.name + '</b> · rank ' + it.rank + ' · ' + it.step + ' 步' +
+            ( r.active === it.id ? ' · <span style="color:var(--accent2)">当前生效</span>' : '' );
+          var sz = document.createElement( 'span' );
+          sz.className = 'sz';
+          sz.textContent = bytes( ( it.floats || 0 ) * 4 );
+          var on = document.createElement( 'button' );
+          on.className = 'btn';
+          on.textContent = r.active === it.id ? '已启用' : '启用';
+          on.disabled = r.active === it.id;
+          on.onclick = async function ()
+          {
+            await setActive( key, it.id );
+            if ( window.__cvStatus ) window.__cvStatus( '已切换适配器 · 重新加载模型生效', 'ok' );
+            await renderAdapters( key );
+          };
+          var del = document.createElement( 'button' );
+          del.className = 'btn ghost';
+          del.textContent = '删除';
+          del.onclick = async function ()
+          {
+            await removeAdapter( key, it.id );
+            await renderAdapters( key );
+          };
+          row.appendChild( nm ); row.appendChild( sz ); row.appendChild( on ); row.appendChild( del );
+          box.appendChild( row );
+        } );
+      }
+      async function run ()
+      {
+        var key = $( 'ftModel' ).value;
+        if ( !key ) return;
+        var steps = Math.max( 1, +$( 'ftSteps' ).value || 60 );
+        var cfg = {
+          key: key,
+          rank: Math.max( 1, +$( 'ftRank' ).value || 8 ),
+          steps: steps,
+          lr: +$( 'ftLr' ).value || 3e-3,
+          maxLen: Math.max( 16, +$( 'ftMaxLen' ).value || 192 )
+        };
+        $( 'ftStart' ).disabled = true; $( 'ftStop' ).disabled = false;
+        var t0 = performance.now();
+        try
+        {
+          var r = await start( cfg, function ( p )
+          {
+            if ( p.phase === 'load' ) { $( 'ftStat' ).textContent = p.message; return; }
+            $( 'ftProg' ).style.width = ( p.step / p.steps * 100 ).toFixed( 1 ) + '%';
+            $( 'ftStat' ).textContent = '第 ' + p.step + '/' + p.steps + ' 步 · loss ' + p.loss.toFixed( 4 ) + ' · ' + p.pairs + ' 条样本';
+          } );
+          var saved = await saveAdapter( key, ST, 'lora-' + steps + 'steps' );
+          var dt = ( performance.now() - t0 ) / 1000;
+          $( 'ftOut' ).textContent = '适配器已保存 · ' + bytes( saved.bytes );
+          $( 'ftStat' ).textContent = '完成：loss ' + r.loss.toFixed( 4 ) + ' · ' + dt.toFixed( 1 ) + 's · ' + r.lora + ' 层适配器 · 样本 ' + r.pairs + ' 条';
+          if ( window.__cvStatus ) window.__cvStatus( '微调完成 · 重新加载模型生效', 'ok' );
+        }
+        catch ( e )
+        {
+          $( 'ftStat' ).textContent = '失败：' + ( ( e && e.message ) || e );
+          console.error( e );
+        }
+        finally
+        {
+          $( 'ftStart' ).disabled = false; $( 'ftStop' ).disabled = true;
+          void renderAdapters( key );
+        }
+      }
+      async function open ()
+      {
+        var d = dlg();
+        d.classList.add( 'on' );
+        var sel = $( 'ftModel' ), list = [];
+        try { list = await window.TLX_MODELS.list(); } catch ( e ) { list = []; }
+        sel.innerHTML = '';
+        if ( !list.length )
+        {
+          sel.innerHTML = '<option value="">（还没有下载模型）</option>';
+          $( 'ftData' ).textContent = '先到「模型 · 下载 / 管理」下载一个开源模型。';
+          $( 'ftStart' ).disabled = true;
+          return;
+        }
+        $( 'ftStart' ).disabled = false;
+        list.forEach( function ( m )
+        {
+          var o = document.createElement( 'option' );
+          o.value = m.key; o.textContent = m.name + ' · ' + m.arch;
+          sel.appendChild( o );
+        } );
+        var pairs = await chatPairs();
+        $( 'ftData' ).textContent = '训练数据：' + pairs.length + ' 条问答对（来自全部会话）' +
+          ( pairs.length ? '' : ' —— 先在对话页聊几轮' );
+        sel.onchange = function () { void renderAdapters( sel.value ); };
+        await renderAdapters( sel.value );
+      }
+
+      window.TLX_FINETUNE = {
+        open: open, start: start, stop: stop,
+        install: install, applyAdapter: applyAdapter, readAdapter: readAdapter, saveAdapter: saveAdapter,
+        listAdapters: listAdapters, setActive: setActive, removeAdapter: removeAdapter,
+        chatPairs: chatPairs, trainStep: trainStep, _state: function () { return ST; }
+      };
+    } )();
+  </script>
+
+  <script id="tlxModelHub">
+    /* ==========================================================================
+       兼容层：旧的「模型抽屉」已并入「模型中心」（panel-hub），这里只保留
+       TLX_MODELHUB.open / close / render 三个入口，避免旧脚本与书签失效。
+       真正管理模型的地方只有一处，不再维护第二套列表 UI。
+       ========================================================================== */
+    ( function ()
+    {
+      'use strict';
+      var $ = function ( id ) { return document.getElementById( id ); };
+      function open ()
+      {
+        var T = window.__ttllm;
+        if ( T && T.ModelCenter ) T.ModelCenter.tab( 'all' );
+        var b = document.querySelector( '#tabs button[data-tab="hub"]' );
+        if ( b ) b.click();
+        setTimeout( function ()
+        {
+          var t = window.__ttllm;
+          if ( t && t.ModelCenter ) { t.ModelCenter.tab( 'all' ); t.ModelCenter.refresh(); }
+        }, 0 );
+      }
+      function close () { }
+      function render () { var T = window.__ttllm; if ( T && T.ModelCenter ) void T.ModelCenter.refresh(); }
+      window.TLX_MODELHUB = { open: open, close: close, render: render };
+
+      /* 对话页输入框旁的「模型」胶囊 → 打开模型中心 */
+      function mountPill ()
+      {
+        var bar = document.querySelector( '#panel-chat .composer-tools' );
+        if ( !bar || $( 'mhPill' ) ) return;
+        var b = document.createElement( 'button' );
+        b.className = 'btn ghost'; b.id = 'mhPill'; b.textContent = '🧩 模型';
+        b.title = '打开模型中心（切换 / 下载 / 管理）';
+        b.onclick = open;
+        bar.insertBefore( b, bar.firstChild );
+        function sync ()
+        {
+          var sel = $( 'chatWeightSelect' );
+          if ( !sel || !sel.options.length ) return;
+          var opt = sel.options[ sel.selectedIndex ] || sel.options[ 0 ];
+          var txt = String( opt ? opt.textContent : '模型' ).replace( /\s*·\s*步\s*\d+$/, '' );
+          b.textContent = '🧩 ' + ( txt.length > 18 ? txt.slice( 0, 18 ) + '…' : txt );
+        }
+        var sel = $( 'chatWeightSelect' );
+        if ( sel ) sel.addEventListener( 'change', function () { setTimeout( sync, 30 ); } );
+        setInterval( sync, 2000 );
+        sync();
+      }
+      if ( document.readyState === 'loading' ) document.addEventListener( 'DOMContentLoaded', mountPill );
+      else setTimeout( mountPill, 300 );
     } )();
   </script>
 
