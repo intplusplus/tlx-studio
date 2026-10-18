@@ -1234,6 +1234,31 @@
     .cv-sugs { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 8px; max-width: 560px }
     .cv-sug { border: 1px solid var(--line); background: var(--panel2); color: var(--muted); padding: 7px 12px; border-radius: 99px; font-size: 12px; cursor: pointer }
     .cv-sug:hover { border-color: var(--accent); color: var(--text) }
+    .cv-empty .cv-switch { margin-top: 4px; background: none; border: 1px dashed var(--line); color: var(--faint); font-size: 11.5px; padding: 5px 14px; border-radius: 99px; cursor: pointer }
+    .cv-empty .cv-switch:hover { border-color: var(--accent); color: var(--accent) }
+    /* 输入框上方：模型胶囊 + 上下文占用 */
+    .cv-capbar { position: relative; display: flex; align-items: center; gap: 10px; padding: 0 2px 8px }
+    .cv-cap { display: inline-flex; align-items: center; gap: 7px; max-width: 100%; background: var(--panel2); border: 1px solid var(--line); border-radius: 99px; padding: 5px 12px 5px 9px; font-size: 12px; color: var(--muted); cursor: pointer }
+    .cv-cap:hover { border-color: var(--accent); color: var(--text) }
+    .cv-cap-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent2); flex: 0 0 auto }
+    .cv-cap-name { max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+    .cv-cap-caret { font-size: 9px; color: var(--faint) }
+    .cv-ctxwrap { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; font-size: 11px; color: var(--faint); font-family: var(--mono) }
+    .cv-ctxbar { width: 74px; height: 4px; border-radius: 99px; background: var(--panel3); overflow: hidden }
+    .cv-ctxfill { display: block; height: 100%; width: 0; border-radius: 99px; background: var(--accent) }
+    .cv-ctxfill.warn { background: #f5a623 }
+    .cv-ctxfill.over { background: var(--bad) }
+    .cv-cap-menu { position: absolute; left: 0; bottom: calc(100% + 6px); min-width: 250px; max-width: 360px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 6px; display: none; z-index: 80; max-height: 320px; overflow-y: auto }
+    .cv-cap-menu.open { display: block }
+    .cv-cap-item { display: block; width: 100%; text-align: left; background: none; border: none; color: var(--muted); font-size: 12px; padding: 8px 10px; border-radius: 8px; cursor: pointer; line-height: 1.5 }
+    .cv-cap-item:hover { background: var(--panel2); color: var(--text) }
+    .cv-cap-item.sel { color: var(--accent); background: var(--panel2) }
+    .cv-cap-item.more { border-top: 1px solid var(--line); margin-top: 4px; color: var(--faint) }
+    .cv-rename { flex: 1; min-width: 0; background: var(--panel3); border: 1px solid var(--accent); border-radius: 6px; color: var(--text); font-size: 12.5px; padding: 3px 7px; font-family: inherit }
+    .cv-errhint { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 2px 6px 0; font-size: 11.5px; color: var(--muted); line-height: 1.7 }
+    .cv-errhint-t { flex: 1; min-width: 180px }
+    .cv-errhint-btn { background: var(--panel3); border: 1px solid var(--line); border-radius: 99px; color: var(--accent); font-size: 11px; padding: 3px 12px; cursor: pointer }
+    .cv-errhint-btn:hover { border-color: var(--accent) }
     .cv-box {
       display: flex;
       align-items: flex-end;
@@ -2136,6 +2161,18 @@
               <div class="chatscroll chatstream" id="chatLog"></div>
 
               <div class="composer-wrap">
+                <div class="cv-capbar">
+                  <button class="cv-cap" id="cvCapBtn" type="button" title="切换对话所用模型">
+                    <span class="cv-cap-dot"></span>
+                    <span class="cv-cap-name" id="cvCapName">当前模型</span>
+                    <span class="cv-cap-caret">▾</span>
+                  </button>
+                  <span class="cv-ctxwrap" title="上下文占用">
+                    <span class="cv-ctxbar"><span class="cv-ctxfill" id="cvCtxFill"></span></span>
+                    <span class="cv-ctxtext" id="cvCtxText">上下文 —</span>
+                  </span>
+                  <div class="cv-cap-menu" id="cvCapMenu"></div>
+                </div>
                 <div class="composer">
                   <textarea id="chatInput" placeholder="输入消息…  Enter 发送 / Shift+Enter 换行" rows="1"></textarea>
                   <button class="btn primary send" id="chatSend" title="发送">➤</button>
@@ -8606,12 +8643,18 @@ __ENGINE_SRC__
       function updateCtxBar ( used, cap )
       {
         var fill = $( 'ctxFill' ), info = $( 'ctxInfo' );
-        if ( !fill || !info ) return;
+        var cf = $( 'cvCtxFill' ), ct = $( 'cvCtxText' );
         var pct = cap > 0 ? Math.min( 100, used / cap * 100 ) : 0;
-        fill.style.width = pct.toFixed( 1 ) + '%';
-        fill.className = 'ctxfill' + ( pct > 90 ? ' over' : pct > 70 ? ' warn' : '' );
-        info.textContent = '已用 ' + used + ' / ' + cap + ' tokens' +
-          ( used > cap ? '(已超上限,将仅用最后 ' + cap + ' 个 token 续写)' : '' );
+        if ( fill && info )
+        {
+          fill.style.width = pct.toFixed( 1 ) + '%';
+          fill.className = 'ctxfill' + ( pct > 90 ? ' over' : pct > 70 ? ' warn' : '' );
+          info.textContent = '已用 ' + used + ' / ' + cap + ' tokens' +
+            ( used > cap ? '(已超上限,将仅用最后 ' + cap + ' 个 token 续写)' : '' );
+        }
+        // 输入框上方胶囊旁的上下文占用（同一数据源的轻量镜像）
+        if ( cf ) { cf.style.width = pct.toFixed( 1 ) + '%'; cf.className = 'cv-ctxfill' + ( pct > 90 ? ' over' : pct > 70 ? ' warn' : '' ); }
+        if ( ct ) ct.textContent = cap > 0 ? ( '上下文 ' + used + ' / ' + cap ) : '上下文 —';
       }
 
       /* ===================== src/app/studio/bindings.ts — 专家面板事件绑定（v1 布局遗留，按钮契约仍被引用）===================== */
@@ -9587,6 +9630,8 @@ __ENGINE_SRC__
           d.className = 'cv-sitem' + ( CUR && CUR.id === s.id ? ' active' : '' );
           var t = document.createElement( 'span' ); t.className = 't';
           t.textContent = ( s.title || '新对话' ) + ( s.msgs && s.msgs.length ? '' : '' );
+          t.title = '双击重命名';
+          t.ondblclick = function ( ev ) { ev.stopPropagation(); cvRenameSession( s.id, t ); };
           var x = document.createElement( 'button' ); x.className = 'x'; x.textContent = '✕'; x.title = '删除会话';
           x.onclick = function ( ev ) { ev.stopPropagation(); cvSessionRemove( s.id ); };
           d.onclick = function () { cvSelectSession( s.id ); };
@@ -9595,7 +9640,50 @@ __ENGINE_SRC__
         } );
       }
 
+      // ---------------- 会话重命名（双击标题 → inline 编辑） ----------------
+      function cvRenameSession ( id, span )
+      {
+        var s = SESS.filter( function ( x ) { return x.id === id; } )[ 0 ];
+        if ( !s || !span || !span.parentNode ) return;
+        var inp = document.createElement( 'input' );
+        inp.className = 'cv-rename';
+        inp.value = s.title || '新对话';
+        span.parentNode.replaceChild( inp, span );
+        inp.focus(); inp.select();
+        var done = false;
+        function commit ( save )
+        {
+          if ( done ) return; done = true;
+          var v = inp.value.trim();
+          if ( save && v && v !== s.title ) { s.title = v; cvSaveSess( s ); }
+          cvRenderSessions();
+        }
+        inp.addEventListener( 'keydown', function ( ev )
+        {
+          ev.stopPropagation();
+          if ( ev.key === 'Enter' ) { ev.preventDefault(); commit( true ); }
+          else if ( ev.key === 'Escape' ) commit( false );
+        } );
+        inp.addEventListener( 'blur', function () { commit( true ); } );
+        inp.addEventListener( 'click', function ( ev ) { ev.stopPropagation(); } );
+      }
+
       // ---------------- 渲染：消息 ----------------
+      // 当前对话源标签（胶囊 / 空状态 / 消息标注共用）
+      function cvSrcLabel ()
+      {
+        var sel = $( 'chatWeightSelect' );
+        if ( sel && sel.selectedOptions && sel.selectedOptions[ 0 ] ) return sel.selectedOptions[ 0 ].textContent;
+        return '本机训练模型';
+      }
+      function cvHasChatSource ()
+      {
+        // 注意:cvInstall 之前下拉尚未填充,chatSrc() 为空串——默认源就是「本机当前模型」
+        var src = chatSrc() || '__current__';
+        if ( src === '__current__' ) return !!S.model;
+        if ( src === '__official__' ) return !!officialLoaded();
+        return !!src; // off:xxx / 快照 id
+      }
       function cvEmpty ()
       {
         var log = $( 'chatLog' ); if ( !log ) return;
@@ -9603,15 +9691,46 @@ __ENGINE_SRC__
         wrap.className = 'cv-empty';
         var h = document.createElement( 'div' ); h.className = 'big'; h.textContent = '开始一段对话';
         var p = document.createElement( 'p' );
-        p.textContent = '当前连接的是本机模型。想用 Qwen / Llama 这类真正的开源模型，点下方「模型」下载权重——下载后保存在浏览器里，断网也能用。';
         var sugs = document.createElement( 'div' ); sugs.className = 'cv-sugs';
-        [ '你好，介绍下你自己', '用三句话解释什么是注意力机制', '写一个 Python 快排', '帮我起 5 个产品名' ].forEach( function ( s )
+        function fillInput ( s )
         {
           var b = document.createElement( 'button' ); b.className = 'cv-sug'; b.textContent = s;
-          b.onclick = function () { var i = $( 'chatInput' ); i.value = s; cvAutoGrow(); cvFocus(); };
+          b.onclick = function () { var i = $( 'chatInput' ); if ( i ) { i.value = s; cvAutoGrow(); cvFocus(); } };
           sugs.appendChild( b );
-        } );
-        wrap.appendChild( h ); wrap.appendChild( p ); wrap.appendChild( sugs );
+        }
+        function runAct ( label, act )
+        {
+          var b = document.createElement( 'button' ); b.className = 'cv-sug act'; b.textContent = label;
+          b.onclick = act;
+          sugs.appendChild( b );
+        }
+        if ( cvHasChatSource() )
+        {
+          p.textContent = '当前模型:' + cvSrcLabel() + '。输入消息开始,Enter 发送。';
+          [ '你好,介绍下你自己', '用三句话解释什么是注意力机制', '写一个 Python 快排', '帮我起 5 个产品名' ].forEach( fillInput );
+        }
+        else
+        {
+          // 无可用模型:给上手路径,而不是对话示例(没有模型,示例也跑不起来)
+          p.textContent = '这里还没有可对话的模型。30 秒试跑一个,或加载开源权重——都存在本地,断网也能用。';
+          runAct( '⚡ 30 秒试跑一个模型', function () { var b = $( 'sbDemo' ); if ( b ) b.click(); } );
+          runAct( '🧩 加载开源权重', function ()
+          {
+            if ( TLX.hub && TLX.hub.open ) TLX.hub.open();
+            else if ( TLX.shell ) TLX.shell.goTab( 'hub' );
+            setTimeout( function () { var mc = TLX.kit.mc(); if ( mc ) mc.tab( 'discover' ); }, 0 );
+          } );
+          runAct( '✨ 造一个自己的模型', function () { if ( TLX.shell ) TLX.shell.goTab( 'wizard' ); } );
+          runAct( '📖 30 秒了解 TLX', function () { var b = $( 'tourBtn' ); if ( b ) b.click(); } );
+        }
+        var sw = document.createElement( 'button' );
+        sw.className = 'cv-switch'; sw.type = 'button'; sw.textContent = '🧩 换个模型';
+        sw.onclick = function ()
+        {
+          if ( TLX.hub && TLX.hub.open ) TLX.hub.open();
+          else if ( TLX.shell ) TLX.shell.goTab( 'hub' );
+        };
+        wrap.appendChild( h ); wrap.appendChild( p ); wrap.appendChild( sugs ); wrap.appendChild( sw );
         log.appendChild( wrap );
       }
       function cvActs ( m )
@@ -9633,6 +9752,38 @@ __ENGINE_SRC__
         }
         return acts;
       }
+      // ---------------- 错误提示：异常字符串 → 人话 + 可执行动作 ----------------
+      function cvErrHint ( text )
+      {
+        var m = String( text || '' );
+        var openHub = function () { if ( TLX.hub && TLX.hub.open ) TLX.hub.open(); else if ( TLX.shell ) TLX.shell.goTab( 'hub' ); };
+        var openParams = function () { var b = $( 'paramsToggle' ); if ( b ) b.click(); };
+        if ( /桥接层未加载|推理引擎未加载|引擎模块|模型模块未就绪/i.test( m ) )
+          return { text: '推理引擎未就绪,刷新页面通常能恢复。', action: { label: '刷新页面', run: function () { location.reload(); } } };
+        if ( /不在该权重集的词表内|字符不在/.test( m ) )
+          return { text: '这句话里有当前模型词表没有的字符——刚初始化的模型只见过英文示例语料。可先用英文聊几句,或到「数据」页加入中文语料、重建词表并训练后再用。', action: { label: '去数据页', run: function () { if ( TLX.shell ) TLX.shell.goTab( 'data' ); } } };
+        if ( /无法加载所选权重集|无法加载/.test( m ) )
+          return { text: '当前对话源不可用(可能已被删除或移动)。在左侧换个模型即可。', action: { label: '打开模型中心', run: openHub } };
+        if ( /WebGPU|GPUBuffer|adapter|device|显存|out of memory/i.test( m ) )
+          return { text: '计算设备异常(WebGPU)。可到「推理台」检查计算后端,或用精确路径(CPU)重试。', action: { label: '打开推理台', run: function () { if ( TLX.shell ) TLX.shell.goTab( 'infer' ); } } };
+        if ( /上下文|窗口|maxSeqLen|超限/.test( m ) )
+          return { text: '上下文可能超出模型窗口。可调小「生成长度」,或到参数里增大会话窗口。', action: { label: '打开参数', run: openParams } };
+        return { text: '可点上方「重新生成」重试;若持续失败,换个模型或调低生成长度。', action: null };
+      }
+      function cvErrHintNode ( text )
+      {
+        var hint = cvErrHint( text );
+        var hb = document.createElement( 'div' ); hb.className = 'cv-errhint';
+        var ht = document.createElement( 'span' ); ht.className = 'cv-errhint-t'; ht.textContent = hint.text;
+        hb.appendChild( ht );
+        if ( hint.action )
+        {
+          var ab = document.createElement( 'button' ); ab.type = 'button'; ab.className = 'cv-errhint-btn';
+          ab.textContent = hint.action.label; ab.onclick = hint.action.run;
+          hb.appendChild( ab );
+        }
+        return hb;
+      }
       function cvNode ( m )
       {
         var log = $( 'chatLog' );
@@ -9651,7 +9802,9 @@ __ENGINE_SRC__
         b.className = 'cv-bubble' + ( m.md ? ' md' : '' );
         if ( m.md ) b.innerHTML = mdRender( m.text ); else b.textContent = m.text;
         d.appendChild( r ); d.appendChild( b );
-        var mt = document.createElement( 'div' ); mt.className = 'cv-meta'; mt.textContent = m.meta || '';
+        if ( m.err ) d.appendChild( cvErrHintNode( m.text ) );
+        var mt = document.createElement( 'div' ); mt.className = 'cv-meta';
+        mt.textContent = ( m.model ? m.model + ' · ' : '' ) + ( m.meta || '' );
         d.appendChild( mt );
         d.appendChild( cvActs( m ) );
         log.appendChild( d );
@@ -9801,6 +9954,7 @@ __ENGINE_SRC__
       async function cvRun ( userText )
       {
         var src = chatSrc();
+        var srcLabel = cvSrcLabel(); // 记录这条回答是哪个模型给的(切换模型后旧消息仍可追溯)
         var stream = $( 'chatStream' ).checked;
         var bot = cvMsg( 'bot', '' );
         var el = cvAppend( bot );
@@ -9827,6 +9981,7 @@ __ENGINE_SRC__
           txt = txt.replace( /^\s+/, '' );
           if ( !txt ) txt = '（模型没有产出内容：可能训练步数不足，或词表里没有相关字符）';
           bot.text = txt; bot.md = true;
+          bot.model = srcLabel;
           body.classList.remove( 'cv-cur' );
           body.classList.add( 'md' );
           body.innerHTML = mdRender( txt );
@@ -9836,7 +9991,7 @@ __ENGINE_SRC__
             ( nTok ? ' · ' + ( nTok / dt ).toFixed( 1 ) + ' tok/s' : '' ) +
             ( r && r.finishReason && r.finishReason !== 'eos' ? ' · ' + r.finishReason : '' );
           var metaEl = el.querySelector( '.cv-meta' );
-          if ( metaEl ) metaEl.textContent = bot.meta;
+          if ( metaEl ) metaEl.textContent = ( bot.model ? bot.model + ' · ' : '' ) + bot.meta;
           cvStatus( chatSrc() === '__current__' ? '本机模型' : '就绪', 'ok' );
         }
         catch ( e )
@@ -9846,6 +10001,9 @@ __ENGINE_SRC__
           body.classList.remove( 'cv-cur' );
           body.textContent = bot.text;
           el.classList.add( 'err' );
+          var actsEl = el.querySelector( '.cv-acts' );
+          if ( actsEl ) el.insertBefore( cvErrHintNode( msg ), actsEl );
+          else el.appendChild( cvErrHintNode( msg ) );
           cvStatus( '生成失败', 'bad' );
           console.error( e );
         }
@@ -9929,9 +10087,18 @@ __ENGINE_SRC__
         var mc = TLX.kit.mc(); if ( mc ) mc.syncChat();
         TLX.kit.events.emit( 'chat-src', sel.value );   // 顶栏模型胶囊等订阅方随之刷新
       }
+      function cvUpdateCap ()
+      {
+        var n = $( 'cvCapName' );
+        if ( !n ) return;
+        var label = cvSrcLabel();
+        n.textContent = label;
+        n.title = label;
+      }
       function cvUpdateSrcPill ()
       {
         var sel = $( 'chatWeightSelect' ), pill = $( 'cvStatus' );
+        cvUpdateCap();
         if ( !sel || !pill || chatBusy ) return;
         var v = sel.value || '';
         if ( v === '__current__' ) cvStatus( '本机模型 · 步 ' + S.step );
@@ -10105,6 +10272,48 @@ __ENGINE_SRC__
           else if ( TLX.models ) TLX.models.open();
           else cvToast( '模型模块未就绪' );
         };
+        // 模型胶囊：点击弹快速切换菜单（数据源与对话页下拉、模型中心一致）
+        var capBtn = $( 'cvCapBtn' ), capMenu = $( 'cvCapMenu' );
+        if ( capBtn && capMenu )
+        {
+          capBtn.onclick = async function ( ev )
+          {
+            ev.stopPropagation();
+            if ( capMenu.classList.contains( 'open' ) ) { capMenu.classList.remove( 'open' ); return; }
+            var opts = [];
+            try { opts = await chatSourceOptions(); } catch ( e ) { opts = []; }
+            var cur = ( $( 'chatWeightSelect' ) || {} ).value || '';
+            capMenu.innerHTML = opts.map( function ( o )
+            {
+              return '<button type="button" class="cv-cap-item' + ( o.v === cur ? ' sel' : '' ) + '" data-v="' + escapeHtml( o.v ) + '">' + escapeHtml( o.t ) + '</button>';
+            } ).join( '' ) + '<button type="button" class="cv-cap-item more" data-v="__more__">🧩 模型中心 · 下载 / 管理…</button>';
+            capMenu.classList.add( 'open' );
+          };
+          capMenu.addEventListener( 'click', function ( e )
+          {
+            var it = e.target && e.target.closest ? e.target.closest( '.cv-cap-item' ) : null;
+            if ( !it ) return;
+            var v = it.dataset.v || '';
+            capMenu.classList.remove( 'open' );
+            if ( v === '__more__' )
+            {
+              if ( TLX.hub && TLX.hub.open ) TLX.hub.open();
+              else if ( TLX.shell ) TLX.shell.goTab( 'hub' );
+              return;
+            }
+            var sel = $( 'chatWeightSelect' );
+            if ( sel && sel.value !== v )
+            {
+              sel.value = v;
+              sel.dispatchEvent( new Event( 'change' ) );
+            }
+            cvStatus( '已切换:' + cvSrcLabel() );
+          } );
+          document.addEventListener( 'click', function ( e )
+          {
+            if ( capMenu.classList.contains( 'open' ) && !( e.target && e.target.closest && e.target.closest( '.cv-capbar' ) ) ) capMenu.classList.remove( 'open' );
+          } );
+        }
         var sc = $( 'newChatBtn' );
         if ( sc ) sc.onclick = function () { cvSessionNew(); var b = document.querySelector( '#tabs button[data-tab="chat"]' ); if ( b ) b.click(); };
 

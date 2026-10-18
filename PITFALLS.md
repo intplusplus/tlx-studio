@@ -11,6 +11,7 @@
 | E2 | `python -m http.server` 起的服务约 2 分钟后消失 | 后台任务被回收 | 每次要 reload 前重启；长任务分批验证 |
 | E3 | HuggingFace 直连超时 | 外网被墙 | `hf-mirror.com` 与 `modelscope.cn` 均可用；下载器已做 HF → hf-mirror → 魔搭 自动换源 ✅ |
 | E4 | `Start-Process` 报「已添加了具有相同键的项」，`Get-ChildItem Env:` 同样报错；headless Chrome 启动后卡死无输出 | 环境里同时存在大小写不同的同名代理变量（如 `HTTPS_PROXY` 与 `https_proxy`），.NET 按 Key 建字典时冲突 | 会话内先 `foreach($n in 'http_proxy','https_proxy','all_proxy','no_proxy'){ [Environment]::SetEnvironmentVariable($n,$null,'Process') }` 清掉小写重复；浏览器仍挂起时改用 `new Function` 语法检查 + 截图回退验证 |
+| E5 | agent-browser 每次 CLI 调用都是**全新的无头浏览器**：页面变 about:blank、IndexedDB/localStorage 不跨调用保留、`reload` 会丢 URL | CLI 无驻留会话 | 「打开 → 操作 → 断言 → 截图」必须链在**同一条 PowerShell 命令**里（`open; sleep; eval; sleep; eval`）；跨命令的页面状态别指望 |
 
 ## 单文件架构
 
@@ -21,6 +22,7 @@
 | A3 | 改了文档里的行号全对不上 | 文档是旧版本写的 | 以 `grep` 定位为准，别信历史行号 |
 | A4 | 同一件事三套实现：模型库面板 / 模型抽屉 / 权重页各有列表与「选用」，激活模型的代码抄了 3 份 | 历史迭代叠加 | 已收进「模型中心」：列表唯一（`ModelCenter.refresh`），选用唯一（`T.adoptRecord`），对话源唯一（`T.selectChatSource`，写回 `#chatWeightSelect`）。新增模型入口直接调这三个，不要再抄 ✅ |
 | A5 | 模型中心首屏渲染时 `TLX_MODELS` 还没加载，开源权重显示 0 | 脚本加载顺序 | `listOfflineModels()` 对未就绪返回 `[]`；`TLX_MODELS.boot()` 里延迟 600ms 补一次 `ModelCenter.refresh()` ✅ |
+| A6 | 空状态对「有没有模型」判断错误（有模型却显示上手路径） | `cvEmpty` 跑在 `loadChatSettings` 的异步续段里，而 `refreshChatSelect`（cvInstall）更晚——`chatWeightSelect` 尚未填充，`chatSrc()` 是空串 | `cvHasChatSource()` 把空串按默认源 `__current__` 处理（`chatSrc() || '__current__'`）✅ |
 
 ## 推理引擎
 
