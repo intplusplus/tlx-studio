@@ -1,0 +1,5 @@
+# 统一行尾为 LF，避免 Windows 检出 CRLF 造成整文件 diff
+* text=auto eol=lf
+
+# 二进制文件不参与行尾转换
+*.png binary
